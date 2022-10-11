@@ -16,10 +16,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
-from TextEmotion.views import TweetViewSet
+from TextEmotion.views import TweetViewSet,TopicViewSet
 
 router = routers.DefaultRouter()
-router.register(r'TextEmotion', TweetViewSet)
+router.register(r'Tweets', TweetViewSet)
+router.register(r'Topics', TopicViewSet)
+
 
 
 urlpatterns = [

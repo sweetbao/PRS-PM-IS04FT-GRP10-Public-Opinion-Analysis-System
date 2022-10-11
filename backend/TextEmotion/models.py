@@ -7,6 +7,7 @@ class Tweet(models.Model):
     title = models.CharField(max_length=100)
     author = models.CharField(max_length=50)
     comment = models.TextField()
+    attitude=models.CharField(max_length=50,null=True)
     retrievetime = models.DateTimeField(auto_now_add=TRUE)
 
     class Meta:

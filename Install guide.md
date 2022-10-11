@@ -4,10 +4,10 @@ Reference:https://realpython.com/python-virtual-environments-a-primer/
 
 1. Need to install python(3.8) and node.js(18.10.0) properly in the environment
 2. git clone git@github.com:sweetbao/PRS-Public-Opinion-Anakysis.git
-3. cd backend
-4. python -m venv venv
-5. venv\Scripts\activate
-6. pip install -r requirements.txt
+3. python -m venv venv
+4. venv\Scripts\activate
+5. pip install -r requirements.txt
+6. cd backend
 7. python manage.py makemigrations
 8. python manage.py migrate
 9. python manage.py runserver

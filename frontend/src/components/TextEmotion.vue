@@ -1,91 +1,95 @@
 <script>
 import axios from 'axios'
-import { reactive, onMounted, toRefs ,ref } from 'vue'
-
-
+import { reactive, onMounted, toRefs, watch } from 'vue'
+import  useEventsBus  from "./eventbus"
 
 
 
 
 
 export default {
-  name: 'TextEmotion',
-
- 
+  name: "Tweets",
 
   setup() {
-    let base_url = "http://127.0.0.1:8000/api/TextEmotion/";
-    const TE_blank = { url: '', title: '', author: '', comment: '' }
-  
-    
-
+    let base_url = "http://127.0.0.1:8000/api/Tweets/";
+    const TE_blank = { url: "", title: "", author: "", comment: "", attitude: ""  };
     const state = reactive({
-      TE_list: [],
-      TextEmotion: Object.assign({}, TE_blank),
-      
-      text:""
+      Tweet_list: [],
+      Tweet: Object.assign({}, TE_blank),
+      text: ""
     });
-
-
-    const getTextEmotion = () => {
-        axios.get(base_url+"?title="+state.text).then(res => {
-        state.TE_list = res.data;
-        state.TextEmotion = Object.assign({}, TE_blank)
+    const getTweet = () => {
+      axios.get(base_url + "?title=" + state.text).then(res => {
+        state.Tweet_list = res.data;
+        state.Tweet = Object.assign({}, TE_blank);
       }).catch(err => {
         console.log(err);
-      })
+      });
     };
-    
+
+    const { bus } = useEventsBus()
+
+    watch(() => bus.value.get('selectedtopic'), (text) => {
+      // destruct the parameters
+       state.text=text;
+       getTweet();
+    })
+
 
     const editTE = (item) => {
-      state.TextEmotion.url = item.url;
-      state.TextEmotion.title = item.title;
-      state.TextEmotion.author = item.author;
-      state.TextEmotion.comment = item.comment;
+      state.Tweet.url = item.url;
+      state.Tweet.title = item.title;
+      state.Tweet.author = item.author;
+      state.Tweet.comment = item.comment;
+      state.Tweet.attitude = item.attitude;
     };
 
     const saveTE = () => {
       let newdata = {
-        title: state.TextEmotion.title,
-        author: state.TextEmotion.author,
-        comment: state.TextEmotion.comment
-      }
-
-      if (state.TextEmotion.url == "") {
+        title: state.Tweet.title,
+        author: state.Tweet.author,
+        comment: state.Tweet.comment,
+        attitude: state.Tweet.attitude,
+      };
+      if (state.Tweet.url == "") {
         axios.post(base_url, newdata).then(() => {
-          getTextEmotion();
+          getTweet();
         }).catch(err => {
-          console.log(err)
-        })
+          console.log(err);
+        });
       }
       else {
-        axios.put(state.TextEmotion.url, newdata).then(() => {
-          getTextEmotion();
+        axios.put(state.Tweet.url, newdata).then(() => {
+          getTweet();
         }).catch(err => {
-          console.log(err)
-        })
+          console.log(err);
+        });
       }
     };
 
     const deleteTE = (item) => {
       axios.delete(item.url).then(() => {
-        getTextEmotion();
+        getTweet();
       }).catch(err => {
-        console.log(err)
-      })
+        console.log(err);
+      });
     };
 
-   
     const Assign = () => {
-     
-      getTextEmotion()
+      getTweet();
     };
-  
 
+    const Clear = () => {
+      state.text="";
+      getTweet();
+    };
 
     onMounted(() => {
-      getTextEmotion()
-    });
+      getTweet();
+
+    }
+    );
+
 
     return {
       ...toRefs(state),
@@ -93,41 +97,44 @@ export default {
       saveTE,
       deleteTE,
       Assign,
-    }
-
-
+      Clear
+    };
   }
 }
 
 </script>
 
 <template>
+
   <div>
-    <form class="d-flex" role="search"  @submit.prevent="submitFunc">
-    <keep-alive>
-      <input class="form-control me-2" id="search" type="search" placeholder="Search" aria-label="Search"  v-model="text">
-    </keep-alive>
-      <button class="btn btn-outline-success" type="submit" @click="Assign()" >Search</button>
-   
+    <form class="d-flex" role="search" @submit.prevent="submitFunc">
+      <keep-alive>
+        <input class="form-control me-2" id="search" type="search" placeholder="Search" aria-label="Search"
+          v-model="text">
+      </keep-alive>
+      <button class="btn btn-outline-success" type="submit" @click="Assign()">Search</button>
+      <button class="btn btn-outline-info" type="submit" style="margin-left:10px" @click="Clear()">Clear</button>
+
     </form>
   </div>
-    <div>{{text}}</div>
   <div class="row">
     <div class="col-md-8">
-      <table class="table table-bordered" >
+      <table class="table table-bordered">
         <thead>
           <tr>
-            <th>title</th>
+            <th>topic</th>
             <th>author</th>
             <th>content</th>
-            <th></th>
+            <th>attitude</th>
+            <th>action</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="item in TE_list" :key="item.url">
+          <tr v-for="item in Tweet_list" :key="item.url">
             <td>{{item.title}}</td>
             <td>{{item.author}}</td>
             <td>{{item.comment}}</td>
+            <td>{{item.attitude}}</td>
             <td><button class="btn btn-success" tilte="edit" @click="editTE(item)" style="margin:0 10px ;">edit</button>
               <button class="btn btn-danger" title="delete" @click="deleteTE(item)">delete</button>
             </td>
@@ -136,23 +143,28 @@ export default {
       </table>
     </div>
     <div class="col-md-4">
-      <input type="hidden" v-model="TextEmotion.url">
+      <input type="hidden" v-model="Tweet.url">
       <div class="form-group">
-        <label for="title">title: </label>
-        <input type="text" id="title" class="form-control" v-model="TextEmotion.title">
+        <label for="title">topic: </label>
+        <input type="text" id="title" class="form-control" v-model="Tweet.title">
       </div>
       <div class="form-group">
         <label for="author">author: </label>
-        <input type="text" id="author" class="form-control" v-model="TextEmotion.author">
+        <input type="text" id="author" class="form-control" v-model="Tweet.author">
       </div>
       <div class="form-group">
         <label for="comment">comment: </label>
-        <textarea id="comment" rows="10" class="form-control" v-model="TextEmotion.comment"></textarea>
+        <textarea id="comment" rows="10" class="form-control" v-model="Tweet.comment"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="attitude">attitude: </label>
+        <input id="attitude" class="form-control" v-model="Tweet.attitude">
       </div>
       <div class="form-group">
         <button class="btn btn-warning" @click="saveTE()">confirm</button>
       </div>
     </div>
+
   </div>
 </template>
 

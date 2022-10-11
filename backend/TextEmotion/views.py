@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from rest_framework import viewsets
 from rest_framework import generics
-from .models import Tweet
-from .serializers import TweetSerializer
+from .models import Tweet, Topic
+from .serializers import TweetSerializer,TopicSerializer
 
 
 
@@ -20,3 +20,8 @@ class TweetViewSet(viewsets.ModelViewSet):
 
         return super().get_queryset()
 
+class TopicViewSet(viewsets.ModelViewSet):
+
+     queryset = Topic.objects.all().order_by('rank')
+     serializer_class = TopicSerializer
+   
