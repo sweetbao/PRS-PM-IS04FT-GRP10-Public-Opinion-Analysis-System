@@ -3,13 +3,15 @@ from bs4 import BeautifulSoup
 import re
 import os
 import json
+import time
 
 bearer_token = 'AAAAAAAAAAAAAAAAAAAAAH6%2FhgEAAAAAC174stDAGI%2FLK7FVJCUdZNIXdr8%3DBddrVjoAkoV2erXv1tZCFWSM7oBYsotbCWWa56AmkVKADFnGHQ'
 
 search_url = "https://api.twitter.com/2/tweets/counts/recent"
 
 # Optional params: start_time,end_time,since_id,until_id,next_token,granularity
-query_params = {'query': 'from:twitterdev','granularity': 'day'}
+query_params = {'query': 'from:twitterdev', 'granularity': 'day'}
+
 
 def is_contains_english(str):
     my_re = re.compile(r'[A-Za-z]', re.S)
@@ -80,12 +82,12 @@ def delete_all_rules(rules):
     print(json.dumps(response.json()))
 
 
-def set_rules(delete):
+def set_rules(delete, trendings):
     # You can adjust the rules if needed
-    trendings = get_latestTopic()
+
     sample_rules = [
         # {"value": "dog has:images", "tag": "dog pictures"},
-        {"value": trendings[0], "tag": trendings[0]},
+        {"value": trendings, "tag": trendings},
 
     ]
     payload = {"add": sample_rules}
@@ -102,8 +104,9 @@ def set_rules(delete):
 
 
 def get_stream(set):
+    dataSet = []
     response = requests.get(
-        "https://api.twitter.com/2/tweets/search/stream", auth=bearer_oauth, stream=True,
+        "https://api.twitter.com/2/tweets/search/stream?tweet.fields=lang,referenced_tweets&expansions=referenced_tweets.id", auth=bearer_oauth, stream=True,
     )
     print(response.status_code)
     if response.status_code != 200:
@@ -112,17 +115,41 @@ def get_stream(set):
                 response.status_code, response.text
             )
         )
+
     for response_line in response.iter_lines():
         if response_line:
             json_response = json.loads(response_line)
-            print(json.dumps(json_response, indent=4, sort_keys=True))
+            a = json.dumps(json_response, indent=4, sort_keys=True)
+            tweetsText = str(json_response['includes']['tweets'][0]['text'])
+            langage = str(json_response['data']['lang'])
+            print(a)
+            if langage != 'en':
+                continue
+            if tweetsText.__contains__('RT @'):
+                tweetsText = json_response['includes']['tweets'][1]['text']
+            dataSet.append(tweetsText)
+            print(len(dataSet))
+            if len(dataSet) > 999:
+                response.close()
+                return dataSet
+
+    return dataSet
 
 
 def main():
+    targetData = []
     rules = get_rules()
     delete = delete_all_rules(rules)
-    set = set_rules(delete)
-    get_stream(set)
+    trendings = get_latestTopic()
+    for i in range(0, 10):
+        set = set_rules(delete, trendings[i])
+
+      #  start = time.perf_counter()
+        target = get_stream(set)
+      #  end = time.perf_counter()
+     #  print(end - start)
+        targetData.append(target)
+    return targetData
 
 
 if __name__ == "__main__":
