@@ -18,3 +18,11 @@ class Tweet(models.Model):
 
 class Topic(models.Model):
     rank = models.IntegerField()
+    name = models.TextField()
+    time = models.DateTimeField(auto_now_add=TRUE)
+
+    class Meta:
+        db_table = "Topics"
+
+    def __str__(self):
+        return self.name

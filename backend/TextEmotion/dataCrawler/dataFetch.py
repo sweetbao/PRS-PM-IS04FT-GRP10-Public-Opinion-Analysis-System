@@ -4,6 +4,9 @@ import re
 import os
 import json
 import time
+from backend.TextEmotion.models import Tweet,Topic
+
+
 
 bearer_token = 'AAAAAAAAAAAAAAAAAAAAAH6%2FhgEAAAAAC174stDAGI%2FLK7FVJCUdZNIXdr8%3DBddrVjoAkoV2erXv1tZCFWSM7oBYsotbCWWa56AmkVKADFnGHQ'
 
@@ -141,7 +144,12 @@ def main():
     rules = get_rules()
     delete = delete_all_rules(rules)
     trendings = get_latestTopic()
+    topicList = []
     for i in range(0, 10):
+        topic = Topic()
+        topic.name = trendings[i]
+        topic.rank = i
+        topicList.append(topic)
         set = set_rules(delete, trendings[i])
 
       #  start = time.perf_counter()
