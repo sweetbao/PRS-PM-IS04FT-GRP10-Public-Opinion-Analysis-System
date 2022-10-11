@@ -106,7 +106,7 @@ def set_rules(delete, trendings):
 def get_stream(set):
     dataSet = []
     response = requests.get(
-        "https://api.twitter.com/2/tweets/search/stream", auth=bearer_oauth, stream=True,
+        "https://api.twitter.com/2/tweets/search/stream?tweet.fields=lang,referenced_tweets&expansions=referenced_tweets.id", auth=bearer_oauth, stream=True,
     )
     print(response.status_code)
     if response.status_code != 200:
@@ -120,9 +120,14 @@ def get_stream(set):
         if response_line:
             json_response = json.loads(response_line)
             a = json.dumps(json_response, indent=4, sort_keys=True)
-            #  print(a)
-            #  print(json_response['data']['text'])
-            dataSet.append(json_response['data']['text'])
+            tweetsText = str(json_response['includes']['tweets'][0]['text'])
+            langage = str(json_response['data']['lang'])
+            print(a)
+            if langage != 'en':
+                continue
+            if tweetsText.__contains__('RT @'):
+                tweetsText = json_response['includes']['tweets'][1]['text']
+            dataSet.append(tweetsText)
             print(len(dataSet))
             if len(dataSet) > 999:
                 response.close()
@@ -138,10 +143,11 @@ def main():
     trendings = get_latestTopic()
     for i in range(0, 10):
         set = set_rules(delete, trendings[i])
-        start = time.perf_counter()
+
+      #  start = time.perf_counter()
         target = get_stream(set)
-        end = time.perf_counter()
-        print(end - start)
+      #  end = time.perf_counter()
+     #  print(end - start)
         targetData.append(target)
     return targetData
 
