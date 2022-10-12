@@ -5,6 +5,7 @@ import os
 import json
 import time
 from backend.TextEmotion.models import Tweet,Topic
+from .dataClean import sentenceClean
 
 
 
@@ -130,6 +131,7 @@ def get_stream(set):
                 continue
             if tweetsText.__contains__('RT @'):
                 tweetsText = json_response['includes']['tweets'][1]['text']
+                tweetsText = sentenceClean(tweetsText)
             dataSet.append(tweetsText)
             print(len(dataSet))
             if len(dataSet) > 999:
