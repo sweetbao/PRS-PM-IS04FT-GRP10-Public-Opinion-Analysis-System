@@ -4,8 +4,7 @@ import re
 import os
 import json
 import time
-from backend.TextEmotion.models import Tweet,Topic
-from .dataClean import sentenceClean
+import dataClean
 
 
 
@@ -62,7 +61,7 @@ def get_rules():
         raise Exception(
             "Cannot get rules (HTTP {}): {}".format(response.status_code, response.text)
         )
-    print(json.dumps(response.json()))
+    # print(json.dumps(response.json()))
     return response.json()
 
 
@@ -130,10 +129,13 @@ def get_stream(set):
             if langage != 'en':
                 continue
             if tweetsText.__contains__('RT @'):
-                tweetsText = json_response['includes']['tweets'][1]['text']
-                tweetsText = sentenceClean(tweetsText)
+               try:
+                   tweetsText = json_response['includes']['tweets'][1]['text']
+               except:
+                   continue
+            tweetsText = dataClean.sentenceClean(tweetsText)
             dataSet.append(tweetsText)
-            print(len(dataSet))
+           # print(len(dataSet))
             if len(dataSet) > 999:
                 response.close()
                 return dataSet
@@ -148,10 +150,6 @@ def main():
     trendings = get_latestTopic()
     topicList = []
     for i in range(0, 10):
-        topic = Topic()
-        topic.name = trendings[i]
-        topic.rank = i
-        topicList.append(topic)
         set = set_rules(delete, trendings[i])
 
       #  start = time.perf_counter()
