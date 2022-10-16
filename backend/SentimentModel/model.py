@@ -139,3 +139,39 @@ class Bertmodel(nn.Module):
         output = self.bert(input_ids = input_ids, attention_mask = input_mask, token_type_ids = segment_ids)
         # output = self.dropout(output)
         return output[0]
+
+
+class Bertcnnmodel(nn.Module):
+    def __init__(self, args, in_dim=768, hidden_size=100, num_classes=3):
+        super(Bertcnnmodel, self).__init__()
+        self.bert = BertModel.from_pretrained(args.path + '/bert-base-uncased', output_hidden_states=True)
+        self.conv = nn.Conv2d(1, 1, kernel_size=(3, 768), stride=1, padding=0)
+        self.pool = nn.MaxPool1d(kernel_size=48, stride=1)
+        self.linear1 = nn.Linear(13, 13)
+        self.linear2 = nn.Linear(13, num_classes)
+        # self.bert = BertForSequenceClassification.from_pretrained('bert-base-uncased', num_labels=3)
+        # for param in self.bert.parameters():
+        #     param.requires_grad = True
+        # self.dropout = nn.Dropout(0.5)
+        # self.fc = nn.Linear(self.hidden_size, self.num_classes)
+
+
+    def forward(self, text):
+        input_mask = text[:, 1, :].squeeze().long()
+        segment_ids = text[:, 2, :].squeeze().long()
+        input_ids = text[:, 0, :].squeeze().long()
+        output = self.bert(input_ids=input_ids, attention_mask=input_mask, token_type_ids=segment_ids)
+
+        record = []
+        for i in range(len(output[2])):
+            max_val = self.conv(output[2][i].unsqueeze(1)).squeeze(1).max(dim=1)[0]
+            record.append(max_val)
+
+        x = torch.cat(tuple(record), dim=1)
+
+        x = self.linear1(x).relu()
+        x = self.linear1(x)
+        x = self.linear2(x)
+        # output = self.dropout(output)
+        return x
+

@@ -40,6 +40,7 @@ def BertDataLoader( index=None, mask=None, sequence_len=100, features_dim=100, b
     train_df, valid_df, test_df = [None, None, None]
     for name in set_name:
         data_path = 'twitter_data/bert_features/'+name+'.pkl'
+        # data_path = 'twitter_data/bert_features/' + 'test' + '.pkl'
         with open(data_path, 'rb') as fp:
             pkldata = pickle.load(fp)
 

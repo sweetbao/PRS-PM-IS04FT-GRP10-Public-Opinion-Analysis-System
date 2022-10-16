@@ -11,7 +11,7 @@ from tensorboardX import SummaryWriter
 from glob import glob
 
 from dataset import MyDataset
-from model import RNN, LSTM, CNN, LSTM_with_Attention, Bertmodel
+from model import RNN, LSTM, CNN, LSTM_with_Attention, Bertmodel, Bertcnnmodel
 import os
 from tqdm import tqdm
 from dataloader import BertDataLoader
@@ -63,7 +63,7 @@ def parse_args():
                         help="Embedding dimensions")
     parser.add_argument('--word_vector', type=str2bool, nargs='?',
                         default=True, help="Use word vector like gloVe")
-    parser.add_argument('--model', type=str, choices=['rnn', 'lstm', 'cnn', 'lstm_attn', 'bert'],
+    parser.add_argument('--model', type=str, choices=['rnn', 'lstm', 'cnn', 'lstm_attn', 'bert', 'bert_cnn'],
                         required=True,
                         help="Choose model")
 
@@ -89,8 +89,8 @@ def parse_args():
                                    default=True, help="use bidirectional")
         target_parser.add_argument('--dropout', type=str2bool, nargs='?',
                                    default=True, help="Use dropout")
-    elif parser_args.model in 'bert':
-        target_parser.add_argument('--max_seq_length', type=int, default=512,
+    elif parser_args.model in ['bert', 'bert_cnn']:
+        target_parser.add_argument('--max_seq_length', type=int, default=50,
                                    help="bert max sequence length")
         target_parser.add_argument('--path', type=str, default=os.getcwd(),
                                    help="bert model root path")
@@ -151,6 +151,11 @@ def main(args):
         model = Bertmodel(
             args
         ).to(device)
+    elif args.model == 'bert_cnn':
+        print("Model: Bert with CNN")
+        model = Bertcnnmodel(
+            args
+        ).to(device)
 
     if args.word_vector:
         model.embedding.weight.data.copy_(dataset.TEXT.vocab.vectors)
@@ -167,7 +172,7 @@ def main(args):
     best_acc = 0
 
     for epoch in range(args.epoch):
-        if args.model == 'bert':
+        if args.model == 'bert' or args.model == 'bert_cnn':
             data = BertDataLoader()
             # data = pickle.load(open( "twitter_data/bert_features/train.pkl", 'rb'))
             train_loss, train_acc = train(model, data['train'],
@@ -208,7 +213,7 @@ def main(args):
             filename = "checkpoints/{}_{}_bs{}_hd{}_acc{:.03f}.pth".format(
                 args.model, args.optim, args.batch_size, args.hd, test_acc
             )
-        elif args.model in ['bert']:
+        elif args.model in ['bert', 'bert_cnn']:
             filename = "checkpoints/{}_{}_bs{}_acc{:.03f}.pth".format(
                 args.model, args.optim, args.batch_size, test_acc
                 )
@@ -224,7 +229,7 @@ def train(model, iterator, optimizer, criterion):
 
     model.train()
     device = torch.device('cuda' if torch.cuda.is_available() and args.cuda else 'cpu')
-    if type(model) == Bertmodel:
+    if type(model) == Bertmodel or type(model) == Bertcnnmodel:
         with tqdm(total=len(iterator)) as progress_bar:
             for batch in iterator:
                 # optimizer.zero_grad()
@@ -276,7 +281,7 @@ def evaluate(model, iterator, criterion):
 
     model.eval()
     device = torch.device('cuda' if torch.cuda.is_available() and args.cuda else 'cpu')
-    if type(model) == Bertmodel:
+    if type(model) == Bertmodel or type(model) == Bertcnnmodel:
         with tqdm(total=len(iterator)) as progress_bar:
             for batch in iterator:
                 feature = batch['features'].to(device)
