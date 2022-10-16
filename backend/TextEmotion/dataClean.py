@@ -9,12 +9,12 @@ def sentenceClean(sentence):
     sentence = str(sentence)
     if 'https' in sentence:
         sentence = sentence.split('https')[0]
-        print(sentence)
     # replace the \n and tag
     sentence = re.sub(r'[(\n)]', ' ', sentence)
     sentence = filter_emoji(sentence)
     sentence = filter_kor(sentence)
     sentence = specialEmoji(sentence)
+
 
     return sentence
 

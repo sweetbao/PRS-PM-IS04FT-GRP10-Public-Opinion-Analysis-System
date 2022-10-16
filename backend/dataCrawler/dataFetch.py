@@ -37,6 +37,7 @@ def get_latestTopic():
         a = soup.find('a', class_="tweet", rank=count).text
         count = count + 1
         if is_contains_english(a):
+            a = a.replace('#','')
             topic_list.append(a)
             print(a)
 
@@ -135,6 +136,7 @@ def get_stream(set):
                    continue
             tweetsText = dataClean.sentenceClean(tweetsText)
             dataSet.append(tweetsText)
+            print(tweetsText)
            # print(len(dataSet))
             if len(dataSet) > 999:
                 response.close()
