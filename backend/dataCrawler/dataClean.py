@@ -31,7 +31,12 @@ def specialEmoji(sentence):
     sentence = sentence.replace('❤','',)
     return sentence
 
-
+def filter_kor(desstr, restr=''):
+    try:
+        kor = re.compile(r'[\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7A3]')
+    except re.error:
+        kor = re.compile(u'[\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7A3]')
+    return kor.sub(restr,desstr)
 
 
 
