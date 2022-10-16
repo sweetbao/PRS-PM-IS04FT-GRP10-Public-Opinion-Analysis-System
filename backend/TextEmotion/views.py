@@ -1,8 +1,10 @@
+from django.http import HttpResponse
 from django.shortcuts import render
 from rest_framework import viewsets
 from rest_framework import generics
 from .models import Tweet, Topic
 from .serializers import TweetSerializer,TopicSerializer
+from .service import get_latestTopic
 
 
 
@@ -24,4 +26,13 @@ class TopicViewSet(viewsets.ModelViewSet):
 
      queryset = Topic.objects.all().order_by('rank')
      serializer_class = TopicSerializer
-   
+
+
+def addTopic(request):
+    topicList = get_latestTopic()
+    Topics = []
+    rank = 1
+    for topic in topicList:
+        topicN = Topic(rank = rank,name = topic)
+        topicN.save()
+    return
