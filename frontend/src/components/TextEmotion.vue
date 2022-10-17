@@ -1,26 +1,31 @@
 <script>
 import axios from 'axios'
 import { reactive, onMounted, toRefs, watch } from 'vue'
-import  useEventsBus  from "./eventbus"
-
-
+import useEventsBus from "./eventbus"
+import PieChart from './PieChart.vue'
+import LineChart from './LineChart.vue'
 
 
 
 export default {
   name: "Tweets",
-
+  components: {
+    PieChart,
+    LineChart
+  },
   setup() {
     let base_url = "http://127.0.0.1:8000/api/Tweets/";
-    const TE_blank = { url: "", title: "", author: "", comment: "", attitude: ""  };
+    const TE_blank = { url: "", title: "", author: "", comment: "", attitude: 0, topic: "" };
     const state = reactive({
       Tweet_list: [],
       Tweet: Object.assign({}, TE_blank),
-      text: ""
+      text: "",
+      testNumber: 0,
     });
     const getTweet = () => {
       axios.get(base_url + "?title=" + state.text).then(res => {
         state.Tweet_list = res.data;
+        state.testNumber = state.Tweet_list[0].attitude;
         state.Tweet = Object.assign({}, TE_blank);
       }).catch(err => {
         console.log(err);
@@ -31,8 +36,8 @@ export default {
 
     watch(() => bus.value.get('selectedtopic'), (text) => {
       // destruct the parameters
-       state.text=text;
-       getTweet();
+      state.text = text;
+      getTweet();
     })
 
 
@@ -42,6 +47,7 @@ export default {
       state.Tweet.author = item.author;
       state.Tweet.comment = item.comment;
       state.Tweet.attitude = item.attitude;
+      state.Tweet.topic = item.topic;
     };
 
     const saveTE = () => {
@@ -50,6 +56,7 @@ export default {
         author: state.Tweet.author,
         comment: state.Tweet.comment,
         attitude: state.Tweet.attitude,
+        topic: state.Tweet.topic
       };
       if (state.Tweet.url == "") {
         axios.post(base_url, newdata).then(() => {
@@ -80,7 +87,7 @@ export default {
     };
 
     const Clear = () => {
-      state.text="";
+      state.text = "";
       getTweet();
     };
 
@@ -126,7 +133,7 @@ export default {
             <th>author</th>
             <th>content</th>
             <th>attitude</th>
-            <th>action</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -164,7 +171,51 @@ export default {
         <button class="btn btn-warning" @click="saveTE()">confirm</button>
       </div>
     </div>
+    <div>
+      <PieChart :chart-data="    
+      {
+        labels: [
+          'Negative',
+          'Neutral',
+          'Positive'
+        ],
+        datasets: [
+          {
+            label: 'My First Dataset',
+            data: [testNumber,30,20 ],
+            backgroundColor: [
+              'rgb(255, 99, 132)',
+              'rgb(54, 162, 235)',
+              'rgb(255, 205, 86)'
+            ],
+            hoverOffset: 4
+          }
+        ]}" />
+    </div>
+    <div> <LineChart :chart-data=" {
+        labels: [1, 2, 3, 4, 5, 6, 7],
+        datasets: [
+          {
+            label: 'Positive',
+            data: [10,20,30,40,50,60,70],
+            borderColor:'rgb(255, 99, 132)',
+            backgroundColor: 'rgb(255, 99, 132)',
 
+          },
+          {
+            label: 'Neutral',
+            data: [70,60,50,40,30,20,10],
+            borderColor: 'rgb(54, 162, 235)',
+            backgroundColor: 'rgb(255, 99, 132)',
+          },
+          {
+            label: 'Negative',
+            data: [25,25,25,25,25,25,25],
+            borderColor: 'rgb(255, 205, 86)',
+            backgroundColor: 'rgb(255, 205, 86)',
+          }
+        ]
+      }" /></div>
   </div>
 </template>
 
