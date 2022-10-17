@@ -1,7 +1,5 @@
 import re
-import emoji
-import simplejson as simplejson
-from urllib3.packages.six import unichr
+
 
 
 def sentenceClean(sentence):
