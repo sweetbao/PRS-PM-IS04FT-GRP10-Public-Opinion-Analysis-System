@@ -7,10 +7,10 @@
 4. venv\Scripts\activate
 5. pip install -r requirements.txt
 6. cd backend
-7. Download pretrained bert model file to `./SentimentModel/bert-base-uncased` (please create this folder if not exist)
+7. Download pretrained bert model file to `./TextEmotion/SentimentModel/bert-base-uncased` (please create this folder if not exist)
     https://drive.google.com/drive/folders/18UwFy_7vD2ssGo76FRMO0r0tYSjfHmFs?usp=sharing
 
-8. Download our model file to `./SentimentModel/checkpoints`(please create this folder if not exist)
+8. Download our model file to `./TextEmotion/SentimentModel/checkpoints`(please create this folder if not exist)
     https://drive.google.com/drive/folders/1td7h1gs2Uu6ia9MO6jvBOL-HRht-0EnK?usp=sharing
 
 9. python manage.py makemigrations

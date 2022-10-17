@@ -19,7 +19,7 @@ def parse_args():
 
 
 def bert_feature(args, data):
-    path = os.getcwd()
+    path = args.path
     # data_path = os.path.join(path, "annotation/" + language + "/labeled/total.json")
     # save_path = os.path.join(path, "annotation/" + language + args.split_path)
     tokenizer = BertTokenizer.from_pretrained(path + '/bert-base-uncased', do_lower_case=True)

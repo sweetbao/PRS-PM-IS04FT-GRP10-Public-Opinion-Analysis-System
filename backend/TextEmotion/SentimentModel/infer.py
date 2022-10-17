@@ -1,10 +1,10 @@
 import pandas as pd
 import torch
 import argparse
-from model import Bertmodel, Bertcnnmodel
+from .model import Bertmodel, Bertcnnmodel
 import os
-from extract_feature import bert_feature
-from dataloader import Loader
+from .extract_feature import bert_feature
+from .dataloader import Loader
 from torch.utils.data import Dataset, DataLoader
 import time
 
@@ -26,15 +26,6 @@ def parse_args():
     parser = argparse.ArgumentParser(description="bert inference", add_help=False)
     parser.add_argument('--model_type', type=str, choices=['bert', 'bert_cnn'], required=True, help="Type of saved model")
     parser.add_argument('--model', type=str, required=True, help="Path to saved model")
-    parser.add_argument('--path', type=str, default=os.getcwd(), help="pretrained bert model root path")
-    parser.add_argument('--max_seq_length', type=int, default=50,
-                        help='length')
-    return parser.parse_args()
-
-def parse_args_default():
-    parser = argparse.ArgumentParser(description="bert inference", add_help=False)
-    parser.add_argument('--model_type', type=str, default="bert_cnn", help="Type of saved model")
-    parser.add_argument('--model', type=str, default="./checkpoints/bert_cnn_adam_bs64_acc0.954.pth", help="Path to saved model")
     parser.add_argument('--path', type=str, default=os.getcwd(), help="pretrained bert model root path")
     parser.add_argument('--max_seq_length', type=int, default=50,
                         help='length')
@@ -72,8 +63,7 @@ def main(args, raw_text):
     datasets = {'infer': Loader(data, sequence_len=100, features_dim=100)}
     dataloaders = {
         ds: DataLoader(datasets[ds],
-                       batch_size=batch_size,
-                       num_workers=1, )
+                       batch_size=batch_size,)
         for ds in datasets.keys()
     }
 
@@ -107,30 +97,42 @@ def infer(model, iterator, batch_size):
     return torch.stack(res)
 
 
+class MyArgs:
+    def __init__(self, model_type, model, path, max_seq_length):
+        self.model_type = model_type
+        self.model = model
+        self.path = path
+        self.max_seq_length = max_seq_length
+
+
+# def parse_args_default():
+#     parser = argparse.ArgumentParser(description="bert inference", add_help=False)
+#     parser.add_argument('--model_type', type=str, default="bert_cnn", help="Type of saved model")
+#     parser.add_argument('--model', type=str, default="./checkpoints/bert_cnn_adam_bs64_acc0.954.pth", help="Path to saved model")
+#     parser.add_argument('--path', type=str, default=os.getcwd(), help="pretrained bert model root path")
+#     parser.add_argument('--max_seq_length', type=int, default=50,
+#                         help='length')
+#     return parser.parse_args()
+
 def get_prediction(raw_text: list) -> list:
-    args = parse_args_default()
+    args = MyArgs(model_type="bert_cnn", model="./SentimentModel/checkpoints/bert_cnn_adam_bs64_acc0.954.pth", path="./SentimentModel", max_seq_length=50)
     predictions = main(args, raw_text)
     return predictions
 
 
 if __name__ == '__main__':
-    args = parse_args()
-    print(args)
-    print(main(args, ["I really like The Avengers cause it make me excited.",
-                "LOL sucks!!!",
-                "trades are welcome! DM if interested~",
-                "Little gifts for lovely SG Carats! My 1st time preparing fansupport please enjoy ~",
-                "I am at LAX international to pick my parents up and some k pop group just landed and people are going apeshit, I asked around they’re called Super Junior",
-                "Someone said, I deserve to be filled the same way I pour and I felt that.",
-                "His lil pout and the way he touched boss's neck!?!?? SCREAMING",
-                "Russia says that it is relocating 500 Ukrainian children each day from Kherson to Russian territory. A harrowing admission of war crimes.",
-                ]))
-    # print(get_prediction(["I really like The Avengers cause it make me excited.",
-    #                       "LOL sucks!!!",
-    #                       "trades are welcome! DM if interested~",
-    #                       "Little gifts for lovely SG Carats! My 1st time preparing fansupport please enjoy ~",
-    #                       "I am at LAX international to pick my parents up and some k pop group just landed and people are going apeshit, I asked around they’re called Super Junior",
-    #                       "Someone said, I deserve to be filled the same way I pour and I felt that.",
-    #                       "His lil pout and the way he touched boss's neck!?!?? SCREAMING",
-    #                       "Russia says that it is relocating 500 Ukrainian children each day from Kherson to Russian territory. A harrowing admission of war crimes.",
-    #                       ]))
+    # args = parse_args()
+    # print(args)
+    # print(main(args, ["I really like The Avengers cause it make me excited.",
+    #             "LOL sucks!!!",
+    #             "trades are welcome! DM if interested~",
+    #             "Little gifts for lovely SG Carats! My 1st time preparing fansupport please enjoy ~",
+    #             "I am at LAX international to pick my parents up and some k pop group just landed and people are going apeshit, I asked around they’re called Super Junior",
+    #             "Someone said, I deserve to be filled the same way I pour and I felt that.",
+    #             "His lil pout and the way he touched boss's neck!?!?? SCREAMING",
+    #             "Russia says that it is relocating 500 Ukrainian children each day from Kherson to Russian territory. A harrowing admission of war crimes.",
+    #             ]))
+    print(get_prediction(["I really like The Avengers cause it make me excited.",
+                          "LOL sucks!!!",
+                          "trades are welcome! DM if interested~",
+                          ]))

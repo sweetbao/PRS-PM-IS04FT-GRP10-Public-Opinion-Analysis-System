@@ -11,7 +11,6 @@ argparse~=1.4.0
 spacy~=3.0.6
 torch==1.12.1 
 torchtext==0.6.0
-pip~=21.1.2
 wheel~=0.36.2
 numpy~=1.23.3
 blis~=0.7.8
