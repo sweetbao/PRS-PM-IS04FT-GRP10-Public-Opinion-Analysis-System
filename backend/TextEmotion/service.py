@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import re
 import json
 from .dataClean import sentenceClean
+import time
 
 
 bearer_token = 'AAAAAAAAAAAAAAAAAAAAAH6%2FhgEAAAAAC174stDAGI%2FLK7FVJCUdZNIXdr8%3DBddrVjoAkoV2erXv1tZCFWSM7oBYsotbCWWa56AmkVKADFnGHQ'
@@ -103,6 +104,8 @@ def set_rules(delete, trendings):
 
 def get_stream(set,number):
     dataSet = []
+    startTime = time.perf_counter()
+    print(startTime)
     response = requests.get(
         "https://api.twitter.com/2/tweets/search/stream?tweet.fields=lang,referenced_tweets&expansions=referenced_tweets.id", auth=bearer_oauth, stream=True,
     )
@@ -130,6 +133,13 @@ def get_stream(set,number):
                    continue
             tweetsText = sentenceClean(tweetsText)
             dataSet.append(tweetsText)
+            if number == 200:
+                nowTime = time.perf_counter()
+                print(nowTime-startTime)
+                print(len(dataSet))
+                if nowTime - startTime > 180:
+                    response.close()
+                    return dataSet
            # print(len(dataSet))
             if len(dataSet) > number:
                 response.close()
@@ -155,5 +165,5 @@ def tweetSearch(keywords):
     delete = delete_all_rules(rules)
     trendings = keywords
     set = set_rules(delete, trendings)
-    target = get_stream(set,20)
+    target = get_stream(set,200)
     return target

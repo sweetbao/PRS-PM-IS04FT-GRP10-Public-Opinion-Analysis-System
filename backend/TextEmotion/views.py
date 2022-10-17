@@ -40,8 +40,8 @@ def addTopic(request):
 
 def tweetsSearch(request,name):
     data = tweetSearch(name)
-    for tweet in data:
-        tweetN = Tweet(title = name,comment = tweet)
-        tweetN.save()
+  #  for tweet in data:
+       # tweetN = Tweet(title = name,comment = tweet)
+        #tweetN.save()
     return HttpResponse('添加成功')
 
