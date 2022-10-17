@@ -159,6 +159,6 @@ yarn-error.log
 # Ignore code-workspaces
 *.code-workspace
 
-# Ignore trainning models
+# Ignore training models
 *.bin
 *.pth
