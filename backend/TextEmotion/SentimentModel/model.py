@@ -144,7 +144,7 @@ class Bertmodel(nn.Module):
 class Bertcnnmodel(nn.Module):
     def __init__(self, args, in_dim=768, hidden_size=100, num_classes=3):
         super(Bertcnnmodel, self).__init__()
-        self.bert = BertModel.from_pretrained(args.path + '/bert-base-uncased', output_hidden_states=True)
+        self.bert = BertModel.from_pretrained(args.path + "\\bert-base-uncased", output_hidden_states=True)
         self.conv = nn.Conv2d(1, 1, kernel_size=(3, 768), stride=1, padding=0)
         self.pool = nn.MaxPool1d(kernel_size=48, stride=1)
         self.linear1 = nn.Linear(13, 13)

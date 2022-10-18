@@ -115,7 +115,7 @@ class MyArgs:
 #     return parser.parse_args()
 
 def get_prediction(raw_text: list) -> list:
-    args = MyArgs(model_type="bert_cnn", model="./SentimentModel/checkpoints/bert_cnn_adam_bs64_acc0.954.pth", path="./SentimentModel", max_seq_length=50)
+    args = MyArgs(model_type="bert_cnn", model="TextEmotion\SentimentModel\checkpoints\\bert_cnn_adam_bs64_acc0.954.pth", path="TextEmotion\SentimentModel", max_seq_length=50)
     predictions = main(args, raw_text)
     return predictions
 

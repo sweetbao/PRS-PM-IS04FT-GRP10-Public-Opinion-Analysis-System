@@ -5,6 +5,7 @@ from rest_framework import generics
 from .models import Tweet, Topic
 from .serializers import TweetSerializer, TopicSerializer
 from .service import get_latestTopic, tweetSearch
+from .SentimentModel.infer import get_prediction
 
 
 class TweetViewSet(viewsets.ModelViewSet):
@@ -38,10 +39,27 @@ def addTopic(request):
     return
 
 
-def tweetsSearch(request,name):
+def tweetsSearch(request, name):
     data = tweetSearch(name)
-  #  for tweet in data:
-       # tweetN = Tweet(title = name,comment = tweet)
-        #tweetN.save()
+    a = get_prediction(data)
+    prediction = countNumber(a)
+    print(prediction)
+
+
     return HttpResponse('添加成功')
 
+
+def countNumber(dataList):
+    positive = 0
+    neutral = 0
+    negative = 0
+
+    for data in dataList:
+        if data == 'Positive':
+            positive = positive + 1
+        elif data == 'Neutral':
+            neutral = neutral + 1
+        elif data == 'Negative':
+            negative = negative + 1
+
+    return {'positive':positive,'neutral':neutral,'negative':negative}
