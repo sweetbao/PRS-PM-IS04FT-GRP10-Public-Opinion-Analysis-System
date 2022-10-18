@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from pytorch_transformers import BertForSequenceClassification, XLNetForSequenceClassification, RobertaForSequenceClassification, BertModel
+import platform
 
 torch.manual_seed(1234)
 torch.cuda.manual_seed(1234)
@@ -125,7 +126,11 @@ class CNN_LSTM(nn.Module):
 class Bertmodel(nn.Module):
     def __init__(self, args, in_dim=100, hidden_size=100, num_classes=3):
         super(Bertmodel, self).__init__()
-        self.bert = BertForSequenceClassification.from_pretrained(args.path + '/bert-base-uncased', num_labels=num_classes)
+        if platform.system() == 'Linux' or 'Darwin':
+            self.bert = BertForSequenceClassification.from_pretrained(args.path + '/bert-base-uncased', num_labels=num_classes)
+        else:
+            self.bert = BertForSequenceClassification.from_pretrained(args.path + '\\bert-base-uncased',
+                                                                      num_labels=num_classes)
         # self.bert = BertForSequenceClassification.from_pretrained('bert-base-uncased', num_labels=3)
         # for param in self.bert.parameters():
         #     param.requires_grad = True
@@ -133,9 +138,9 @@ class Bertmodel(nn.Module):
         # self.fc = nn.Linear(self.hidden_size, self.num_classes)
 
     def forward(self, text):
-        input_mask = text[:, 1, :].squeeze().long()
-        segment_ids = text[:, 2, :].squeeze().long()
-        input_ids = text[:, 0, :].squeeze().long()
+        input_mask = text[:, 1, :].long()
+        segment_ids = text[:, 2, :].long()
+        input_ids = text[:, 0, :].long()
         output = self.bert(input_ids = input_ids, attention_mask = input_mask, token_type_ids = segment_ids)
         # output = self.dropout(output)
         return output[0]
@@ -144,7 +149,10 @@ class Bertmodel(nn.Module):
 class Bertcnnmodel(nn.Module):
     def __init__(self, args, in_dim=768, hidden_size=100, num_classes=3):
         super(Bertcnnmodel, self).__init__()
-        self.bert = BertModel.from_pretrained(args.path + '/bert-base-uncased', output_hidden_states=True)
+        if platform.system() == 'Linux' or 'Darwin':
+            self.bert = BertModel.from_pretrained(args.path + '/bert-base-uncased', output_hidden_states=True)
+        else:
+            self.bert = BertModel.from_pretrained(args.path + '\\bert-base-uncased', output_hidden_states=True)
         self.conv = nn.Conv2d(1, 1, kernel_size=(3, 768), stride=1, padding=0)
         self.pool = nn.MaxPool1d(kernel_size=48, stride=1)
         self.linear1 = nn.Linear(13, 13)
@@ -157,9 +165,9 @@ class Bertcnnmodel(nn.Module):
 
 
     def forward(self, text):
-        input_mask = text[:, 1, :].squeeze().long()
-        segment_ids = text[:, 2, :].squeeze().long()
-        input_ids = text[:, 0, :].squeeze().long()
+        input_mask = text[:, 1, :].long()
+        segment_ids = text[:, 2, :].long()
+        input_ids = text[:, 0, :].long()
         output = self.bert(input_ids=input_ids, attention_mask=input_mask, token_type_ids=segment_ids)
 
         record = []

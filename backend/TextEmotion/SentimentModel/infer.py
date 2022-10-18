@@ -7,6 +7,7 @@ from .extract_feature import bert_feature
 from .dataloader import Loader
 from torch.utils.data import Dataset, DataLoader
 import time
+import platform
 
 
 torch.manual_seed(1234)
@@ -85,7 +86,7 @@ def main(args, raw_text):
 
 def infer(model, iterator, batch_size):
     model.eval()
-    device = torch.device('cuda' if torch.cuda.is_available() and args.cuda else 'cpu')
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     res = []
     for batch in iterator:
         feature = batch['features'].to(device)
@@ -115,7 +116,15 @@ class MyArgs:
 #     return parser.parse_args()
 
 def get_prediction(raw_text: list) -> list:
-    args = MyArgs(model_type="bert_cnn", model="./SentimentModel/checkpoints/bert_cnn_adam_bs64_acc0.954.pth", path="./SentimentModel", max_seq_length=50)
+    if platform.system() == 'Linux':
+        args = MyArgs(model_type="bert_cnn", model="./SentimentModel/checkpoints/bert_cnn_adam_bs64_acc0.954.pth",
+                      path="./SentimentModel", max_seq_length=50)
+    elif platform.system() == 'Darwin':
+        args = MyArgs(model_type="bert_cnn", model="./SentimentModel/checkpoints/bert_cnn_adam_bs64_acc0.954.pth",
+                      path="./SentimentModel", max_seq_length=50)
+    elif platform.system() == 'Windows':
+        args = MyArgs(model_type="bert_cnn", model="TextEmotion\SentimentModel\checkpoints\\bert_cnn_adam_bs64_acc0.954.pth",
+                      path="TextEmotion\SentimentModel", max_seq_length=50)
     predictions = main(args, raw_text)
     return predictions
 

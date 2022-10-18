@@ -5,6 +5,7 @@ import pandas as pd
 import os
 import argparse
 import pickle
+import platform
 
 
 def parse_args():
@@ -22,7 +23,10 @@ def bert_feature(args, data):
     path = args.path
     # data_path = os.path.join(path, "annotation/" + language + "/labeled/total.json")
     # save_path = os.path.join(path, "annotation/" + language + args.split_path)
-    tokenizer = BertTokenizer.from_pretrained(path + '/bert-base-uncased', do_lower_case=True)
+    if platform.system() == 'Linux' or 'Darwin':
+        tokenizer = BertTokenizer.from_pretrained(path + '/bert-base-uncased', do_lower_case=True)
+    else:
+        tokenizer = BertTokenizer.from_pretrained(path + '\\bert-base-uncased', do_lower_case=True)
 
     # with open(data_path,'r',encoding='utf8') as fp:
     #     data = json.load(fp)
