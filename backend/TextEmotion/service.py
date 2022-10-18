@@ -133,10 +133,10 @@ def get_stream(set,number):
                    continue
             tweetsText = sentenceClean(tweetsText)
             dataSet.append(tweetsText)
-            if number == 200:
+            if number == 199:
                 nowTime = time.perf_counter()
-                print(nowTime-startTime)
-                print(len(dataSet))
+                #print(nowTime-startTime)
+                #print(len(dataSet))
                 if nowTime - startTime > 180:
                     response.close()
                     return dataSet
@@ -165,5 +165,5 @@ def tweetSearch(keywords):
     delete = delete_all_rules(rules)
     trendings = keywords
     set = set_rules(delete, trendings)
-    target = get_stream(set,200)
+    target = get_stream(set,199)
     return target
