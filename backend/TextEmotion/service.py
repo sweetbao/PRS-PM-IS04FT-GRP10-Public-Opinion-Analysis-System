@@ -148,15 +148,15 @@ def get_stream(set,number):
     return dataSet
 
 
-def tweetsGet():
+def tweetsGet(trendings):
     targetData = []
     rules = get_rules()
     delete = delete_all_rules(rules)
-    trendings = get_latestTopic()
     for i in range(0, 10):
         set = set_rules(delete, trendings[i])
         target = get_stream(set,999)
         targetData.append(target)
+        print('finish '+str(trendings[i]))
 
     return targetData
 
@@ -167,3 +167,4 @@ def tweetSearch(keywords):
     set = set_rules(delete, trendings)
     target = get_stream(set,199)
     return target
+
