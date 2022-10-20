@@ -21,6 +21,10 @@ class Topic(models.Model):
     rank = models.IntegerField()
     name = models.TextField()
     time = models.DateTimeField(auto_now_add=TRUE)
+    positiveNumber = models.IntegerField()
+    negativeNumber = models.IntegerField()
+    neutralNumber = models.IntegerField()
+    historyRank = models.TextField(default='')
 
     class Meta:
         db_table = "Topics"

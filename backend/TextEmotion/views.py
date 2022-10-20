@@ -6,7 +6,7 @@ from rest_framework import viewsets
 from rest_framework import generics
 from .models import Tweet, Topic
 from .serializers import TweetSerializer, TopicSerializer
-from .service import get_latestTopic, tweetSearch,tweetsGet
+from .service import get_latestTopic, tweetSearch, tweetsGet
 from .SentimentModel.infer import get_prediction
 from apscheduler.schedulers.background import BackgroundScheduler
 from django_apscheduler.jobstores import DjangoJobStore, register_job, register_events
@@ -38,17 +38,18 @@ def addTopic():
     rank = 1
     for topic in topicList:
         topicN = Topic(rank=rank, name=topic)
-        topicN.save()
+        # topicN.save()
         rank = rank + 1
     return topicList
 
 
 def tweetsSearch(request, name):
-    data = tweetSearch(name)
-    a = get_prediction(data)
-    prediction = countNumber(a)
-    print(prediction)
-
+    # data = tweetSearch(name)
+    # a = get_prediction(data)
+    # prediction = countNumber(a)
+    # print(prediction)
+    tweetsRunningJob()
+    #findChange(name)
 
     return HttpResponse('添加成功')
 
@@ -58,12 +59,23 @@ def tweetsRunningJob():
     topicList = addTopic()
     allList = tweetsGet(topicList)
     resultlist = []
+    count = 0
     for list in allList:
         result = get_prediction(list)
         predictdata = countNumber(result)
         print(predictdata)
         resultlist.append(predictdata)
+        topic = topicList[count]
+        historyRank = findChange(topic,count)
+        a = Topic(name=topic, rank=count+1, positiveNumber=predictdata['positive'],
+                  neutralNumber=predictdata['neutral'],
+                  negativeNumber=predictdata['negative'],historyRank = historyRank)
+        count = count + 1
+        a.save()
+        print(a)
+
     return resultlist
+
 
 def countNumber(dataList):
     positive = 0
@@ -78,89 +90,29 @@ def countNumber(dataList):
         elif data == 'Negative':
             negative = negative + 1
 
-    return {'positive':positive,'neutral':neutral,'negative':negative}
+    return {'positive': positive, 'neutral': neutral, 'negative': negative}
+
+
+def findChange(topic,currentRank):
+    listTopic = Topic.objects.filter(name=topic).order_by('time')
+    history = ''
+    for topic in listTopic:
+        history = history + str(topic.rank)
+    if history == '':
+        history = str(currentRank)
+    return history
 
 
 try:
     scheduler = BackgroundScheduler()
-    scheduler.add_jobstore(DjangoJobStore(), "default")
-    timenow = time.time()
+    scheduler.add_jobstore(DjangoJobStore(), "default", replace_existing=True)
 
+    django_job_store = DjangoJobStore()
+    print(django_job_store.get_all_jobs())
 
-    @register_job(scheduler, 'cron', id='test1' + str(timenow) , hour=6, minute=0)
-    def sixAm():
-
-        print('job1')
-        tweetsRunningJob()
-
-
-    @register_job(scheduler, 'cron', id='test2' + str(timenow), hour=8, minute=0)
-    def eightAm():
-
-        print('job2')
-        tweetsRunningJob()
-
-
-    @register_job(scheduler, 'cron', id='test3' + str(timenow), hour=10, minute=0)
-    def tenAm():
-
-        print('job3')
-        tweetsRunningJob()
-
-
-    @register_job(scheduler, 'cron', id='test4' + str(timenow), hour=12, minute=0)
-    def tweAm():
-
-        print('job4')
-        tweetsRunningJob()
-
-
-    @register_job(scheduler, 'cron', id='test5' + str(timenow), hour=14, minute=0)
-    def twopm():
-
-        print('job5')
-        tweetsRunningJob()
-
-
-    @register_job(scheduler, 'cron', id='test6' + str(timenow), hour=16, minute=0)
-    def fourpm():
-
-        print('job6')
-        tweetsRunningJob()
-
-
-    @register_job(scheduler, 'cron', id='test7' + str(timenow), hour=18, minute=0)
-    def sixpm():
-
-        print('job7')
-        tweetsRunningJob()
-
-
-    @register_job(scheduler, 'cron', id='test8' + str(timenow), hour=20, minute=0)
-    def eightpm():
-
-        print('job8')
-        tweetsRunningJob()
-
-
-    @register_job(scheduler, 'cron', id='test9' + str(timenow), hour=22, minute=0)
-    def tenpm():
-
-        print('job9')
-        tweetsRunningJob()
-
-
-    @register_job(scheduler, 'cron', id='justtest' + str(timenow), hour=17, minute=28)
-    def tenpm():
-
-        print('job9')
-        tweetsRunningJob()
-
-
-
-
-    register_events(scheduler)
+    #    register_events(scheduler)
     # 启动定时器
     scheduler.start()
+
 except Exception as e:
     print('定时任务异常：%s' % str(e))
