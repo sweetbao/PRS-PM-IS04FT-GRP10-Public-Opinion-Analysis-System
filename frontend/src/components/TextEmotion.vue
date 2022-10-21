@@ -4,6 +4,7 @@ import { reactive, onMounted, toRefs, watch } from 'vue'
 import useEventsBus from "./eventbus"
 import PieChart from './PieChart.vue'
 import LineChart from './LineChart.vue'
+import Topic from './Topic.vue'
 
 
 
@@ -11,7 +12,8 @@ export default {
   name: "Tweets",
   components: {
     PieChart,
-    LineChart
+    LineChart,
+    Topic
   },
   setup() {
     let base_url = "http://127.0.0.1:8000/api/Tweets/";
@@ -112,65 +114,72 @@ export default {
 </script>
 
 <template>
+       <!-- search bar -->
+            
+       <div>
+          <form class="d-flex" role="search" @submit.prevent="submitFunc">
+            <keep-alive>
+              <input class="form-control me-2" id="search" type="search" placeholder="Search for your interested topics" aria-label="Search" v-model="text">
+            </keep-alive>
+            <button class="btn btn-outline-success" type="submit" @click="Assign()">Search </button>
+            <button class="btn btn-outline-info" type="submit" style="margin-left:10px" @click="Clear()">Clear</button>
+      
+          </form>
+        </div>
+        <!-- end search bar -->
 
-  <div>
-    <form class="d-flex" role="search" @submit.prevent="submitFunc">
-      <keep-alive>
-        <input class="form-control me-2" id="search" type="search" placeholder="Search" aria-label="Search"
-          v-model="text">
-      </keep-alive>
-      <button class="btn btn-outline-success" type="submit" @click="Assign()">Search</button>
-      <button class="btn btn-outline-info" type="submit" style="margin-left:10px" @click="Clear()">Clear</button>
+        <div v-if="text===''" class="cocol-md-12"><Topic/></div> 
+         <div class="row" v-else>
+          <div class="row mb-12">
+              <div class="col-lg-6 col-md-6 mb-md-0 mb-4">
+                <div class="card">
+                  <div class="card-header pb-0">
+                    <div class="row">
+                      <div class="col-lg-13 col-12">
+                        <h6>The tweets related to this topic</h6>
+                        <p class="text-sm mb-0">
+                          <i class="fa fa-check text-info" aria-hidden="true"></i>
+                          <span class="font-weight-bold ms-1">See the details</span>
+                        </p>
+                      </div>
+                      <div class="col-lg-6 col-5 my-auto text-end">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card-body pb-2">
 
-    </form>
+          <div class="table-resonsive cocol-md-10">
+            <table class="table align-items-center mb-0">
+              <thead>
+                <tr>
+                  <th>topic</th>
+                  <th>author</th>
+                  <th>content</th>
+                  <th>attitude</th>
+                  
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="item in Tweet_list" :key="item.url">
+                  <td>{{item.title}}</td>
+                  <td>{{item.author}}</td>
+                  <td>{{item.comment}}</td>
+                  <td>{{item.attitude}}</td>
+                </tr>
+              </tbody>
+            </table>
+          
+
+            
+        </div>
+      
+      </div>
+      </div>
+      </div>
   </div>
-  <div class="row">
-    <div class="col-md-8">
-      <table class="table table-bordered">
-        <thead>
-          <tr>
-            <th>topic</th>
-            <th>author</th>
-            <th>content</th>
-            <th>attitude</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="item in Tweet_list" :key="item.url">
-            <td>{{item.title}}</td>
-            <td>{{item.author}}</td>
-            <td>{{item.comment}}</td>
-            <td>{{item.attitude}}</td>
-            <td><button class="btn btn-success" tilte="edit" @click="editTE(item)" style="margin:0 10px ;">edit</button>
-              <button class="btn btn-danger" title="delete" @click="deleteTE(item)">delete</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="col-md-4">
-      <input type="hidden" v-model="Tweet.url">
-      <div class="form-group">
-        <label for="title">topic: </label>
-        <input type="text" id="title" class="form-control" v-model="Tweet.title">
-      </div>
-      <div class="form-group">
-        <label for="author">author: </label>
-        <input type="text" id="author" class="form-control" v-model="Tweet.author">
-      </div>
-      <div class="form-group">
-        <label for="comment">comment: </label>
-        <textarea id="comment" rows="10" class="form-control" v-model="Tweet.comment"></textarea>
-      </div>
-      <div class="form-group">
-        <label for="attitude">attitude: </label>
-        <input id="attitude" class="form-control" v-model="Tweet.attitude">
-      </div>
-      <div class="form-group">
-        <button class="btn btn-warning" @click="saveTE()">confirm</button>
-      </div>
-    </div>
+</div> 
+
+      
     <div>
       <PieChart :chart-data="    
       {
@@ -216,6 +225,6 @@ export default {
           }
         ]
       }" /></div>
-  </div>
+  <!-- </div> -->
 </template>
 
