@@ -1,4 +1,4 @@
-from pickle import TRUE
+
 from django.db import models
 
 
@@ -7,8 +7,8 @@ class Tweet(models.Model):
     title = models.CharField(max_length=100)
     author = models.CharField(max_length=50)
     comment = models.TextField()
-    attitude=models.CharField(max_length=50,null=True)
-    retrievetime = models.DateTimeField(auto_now_add=TRUE)
+    attitude=models.CharField(max_length=50)
+    retrievetime = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = "Twitters"
@@ -20,10 +20,10 @@ class Tweet(models.Model):
 class Topic(models.Model):
     rank = models.IntegerField()
     name = models.TextField()
-    time = models.DateTimeField(auto_now_add=TRUE)
-    positiveNumber = models.IntegerField()
-    negativeNumber = models.IntegerField()
-    neutralNumber = models.IntegerField()
+    time = models.DateTimeField(auto_now_add=True)
+    positiveNumber = models.IntegerField(null=True)
+    negativeNumber = models.IntegerField(null=True)
+    neutralNumber = models.IntegerField(null=True)
     historyRank = models.TextField(default='')
 
     class Meta:
