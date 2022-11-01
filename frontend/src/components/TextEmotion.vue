@@ -115,6 +115,7 @@ export default {
 
 <template>
        <!-- search bar -->
+      
             
        <div>
           <form class="d-flex" role="search" @submit.prevent="submitFunc">
@@ -127,11 +128,11 @@ export default {
           </form>
         </div>
         <!-- end search bar -->
-
-        <div v-if="text===''" class="cocol-md-12"><Topic/></div> 
+        <div style="display: flex;">
+        <div v-if="text===''"><Topic/></div> 
          <div class="row" v-else>
           <div class="row mb-12">
-              <div class="col-lg-6 col-md-6 mb-md-0 mb-4">
+              <div class="col-lg-6 mb-md-0 mb-4">
                 <div class="card">
                   <div class="card-header pb-0">
                     <div class="row">
@@ -153,7 +154,7 @@ export default {
               <thead>
                 <tr>
                   <th>topic</th>
-                  <th>author</th>
+                  <!-- <th>author</th> -->
                   <th>content</th>
                   <th>attitude</th>
                   
@@ -201,6 +202,7 @@ export default {
           }
         ]}" />
     </div>
+  </div>
     <div> <LineChart :chart-data=" {
         labels: [1, 2, 3, 4, 5, 6, 7],
         datasets: [
