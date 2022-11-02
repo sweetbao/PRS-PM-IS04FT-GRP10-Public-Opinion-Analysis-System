@@ -1,4 +1,4 @@
-<script>
+ <script>
 import axios from 'axios'
 import { reactive, onMounted, toRefs  } from 'vue'
 import useEventsBus from './eventbus' 
@@ -63,12 +63,37 @@ export default {
 </script>
 
 <template>
+      <div class="row">
+          <div class="row mb-12">
+              <div class="col-lg-11 col-md-12 mb-md-12 mb-12">
+                <div class="card">
+                  <div class="card-header pb-0">
+                    <div class="row">
+                      <div class="col-lg-50 col-50">
+                        <h6>Top 10 topics in twitter</h6>
+                        <p class="text-sm mb-0">
+                          <i class="fa fa-check text-info" aria-hidden="true"></i>
+                          <span class="font-weight-bold ms-1">most popular topics</span>
+                        </p>
+                      </div>
+                      <div class="col-lg-12 col-12 my-auto text-end">
+                        
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card-body px-0 pb-2">
+          <div class="table-resonsive">
+            <!-- <table class="table align-items-center mb-0"> -->
 <div >
 <ol >
-  <li v-for="item in Topic_list" :key="item.url"  @click="selectT(item.name)">
+  <li v-for="item in Topic_list" :key="item.url"  @click="selectT(item.name)" class="alert alert-primary alert-dismissible text-white">
    {{ item.name }} 
   </li>
 </ol>
   </div>
+</div>
+</div>
+</div>  </div>  </div>  </div>
+
 </template>
 
