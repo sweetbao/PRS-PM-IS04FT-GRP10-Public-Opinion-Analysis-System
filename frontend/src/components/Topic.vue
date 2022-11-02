@@ -2,7 +2,7 @@
 import axios from 'axios'
 import { reactive, onMounted, toRefs  } from 'vue'
 import useEventsBus from './eventbus' 
-
+import router from '../router'
 
 
 
@@ -14,6 +14,7 @@ export default {
   methods:{
       selectTopic(topicname){
          EventBus.assign( topicname);
+         router.push({ name: 'Paper'});
       }
 
     },
