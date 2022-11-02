@@ -7,7 +7,7 @@ from rest_framework import viewsets
 from rest_framework import generics
 from .models import Tweet, Topic
 from .serializers import TweetSerializer, TopicSerializer
-from .service import get_latestTopic, tweetSearch, tweetsGet,randomPick
+from .service import get_latestTopic, tweetSearch, tweetsGet, randomPick, addTopic, countNumber
 from .SentimentModel.infer import get_prediction
 from apscheduler.schedulers.background import BackgroundScheduler
 from django_apscheduler.jobstores import DjangoJobStore, register_job, register_events
@@ -33,24 +33,17 @@ class TopicViewSet(viewsets.ModelViewSet):
     serializer_class = TopicSerializer
 
 
-def addTopic():
-    topicList = get_latestTopic()
-    Topics = []
-    rank = 1
-    for topic in topicList:
-        topicN = Topic(rank=rank, name=topic)
-        # topicN.save()
-        rank = rank + 1
-    return topicList
-
-
 def tweetsSearch(request, name):
     data = tweetSearch(name)
-    tweetsList = randomPick(data)
     a = get_prediction(data)
+    tweetsList, tagLists = randomPick(data, a)
+    result = []
+    for i in range(0, len(tweetsList), 1):
+        dic = {'text': tweetsList[i], 'tags': tagLists[i]}
+        result.append(dic)
     print(a)
     prediction = countNumber(a)
-    json_response = {'tweets':tweetsList,'prediction':prediction}
+    json_response = {'tweets': result, 'prediction': prediction}
     json_response = json.dumps(json_response)
     return HttpResponse(json_response, content_type="application/json")
     # print(prediction)
@@ -81,34 +74,14 @@ def tweetsRunningJob():
     return resultlist
 
 
-def countNumber(dataList):
-    positive = 0
-    neutral = 0
-    negative = 0
-
-    for data in dataList:
-        if data == 'Positive':
-            positive = positive + 1
-        elif data == 'Neutral':
-            neutral = neutral + 1
-        elif data == 'Negative':
-            negative = negative + 1
-
-    return {'positive': positive, 'neutral': neutral, 'negative': negative}
-
-
-def findChange(topic, currentRank):
+def findChange(topic, currentrank):
     listTopic = Topic.objects.filter(name=topic).order_by('time')
     history = ''
     for topic in listTopic:
         history = history + str(topic.rank)
     if history == '':
-        history = str(currentRank)
+        history = str(currentrank)
     return history
-
-
-
-
 
 
 '''

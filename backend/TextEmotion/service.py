@@ -171,7 +171,7 @@ def get_stream(set, number, account):
             print(langage)
 
             # print(a)
-            if langage in ['qme', 'qmt', 'und', 'hi', 'tl']:
+            if langage in ['qme', 'qmt', 'und', 'hi', 'tl', 'und']:
                 continue
             if tweetsText.__contains__('RT @'):
                 try:
@@ -230,13 +230,42 @@ def tweetSearch(keywords):
     return target
 
 
-def randomPick(tweets: list):
+def randomPick(tweets: list, tags: list):
     randomNumber = []
     tweetsList = []
+    tagsResults = []
     while len(randomNumber) < 30:
         number = random.randint(0, len(tweets))
         if not number in randomNumber:
             randomNumber.append(number)
     for i in randomNumber:
         tweetsList.append(tweets[i])
-    return tweetsList
+        tagsResults.append(tags[i])
+    return tweetsList, tagsResults
+
+
+def addTopic():
+    topicList = get_latestTopic()
+    Topics = []
+    rank = 1
+    for topic in topicList:
+        topicN = Topic(rank=rank, name=topic)
+        # topicN.save()
+        rank = rank + 1
+    return topicList
+
+
+def countNumber(dataList):
+    positive = 0
+    neutral = 0
+    negative = 0
+
+    for data in dataList:
+        if data == 'Positive':
+            positive = positive + 1
+        elif data == 'Neutral':
+            neutral = neutral + 1
+        elif data == 'Negative':
+            negative = negative + 1
+
+    return {'positive': positive, 'neutral': neutral, 'negative': negative}
