@@ -34,17 +34,23 @@ def get_latestTopic():
     soup = BeautifulSoup(res.text, 'html.parser')
 
     topic_list = []
+    volume_list = []
     count = 1
     while len(topic_list) < 10:
         print(len(topic_list) + 1)
-        a = soup.find('a', class_="tweet", rank=count).text
+        fullText = soup.find('a', class_="tweet", rank=count)
+
+        a = fullText.text
+        b = fullText.get('tweetc')
+        volume_list.append(b)
         count = count + 1
         if is_contains_english(a):
             a = a.replace('#', '')
             topic_list.append(a)
             print(a)
+    volume_list = handleStr(volume_list)
 
-    return topic_list
+    return topic_list,volume_list
 
 
 def bearer_oauth(r):
@@ -245,14 +251,15 @@ def randomPick(tweets: list, tags: list):
 
 
 def addTopic():
-    topicList = get_latestTopic()
+    topicList,volumeList = get_latestTopic()
     Topics = []
     rank = 1
-    for topic in topicList:
-        topicN = Topic(rank=rank, name=topic)
-        # topicN.save()
+    for i in range(0,len(topicList)):
+        topicN = Topic(rank=rank, name=topicList[i],volume = volumeList[i])
+        #topicN.save()
         rank = rank + 1
-    return topicList
+        Topics.append(topicN)
+    return Topics
 
 
 def countNumber(dataList):
@@ -269,3 +276,17 @@ def countNumber(dataList):
             negative = negative + 1
 
     return {'positive': positive, 'neutral': neutral, 'negative': negative}
+
+
+def handleStr(numberlist: list):
+    result = []
+    for i in numberlist:
+        if i.startswith('Under'):
+            i = i.split(' ')[1]
+        num = float(i[:-1])
+        if i[-1] == 'K':
+            num = num * 1000
+        elif i[-1] == 'M':
+            num = num * 1000000
+        result.append(int(num))
+    return result

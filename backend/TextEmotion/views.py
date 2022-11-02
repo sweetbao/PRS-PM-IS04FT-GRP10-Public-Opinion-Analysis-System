@@ -29,11 +29,13 @@ class TweetViewSet(viewsets.ModelViewSet):
 
 
 class TopicViewSet(viewsets.ModelViewSet):
-    queryset = Topic.objects.all().order_by('rank')
+    queryset = Topic.objects.all().order_by('-time')
+    queryset = queryset[:10]
     serializer_class = TopicSerializer
 
 
 def tweetsSearch(request, name):
+    '''
     data = tweetSearch(name)
     a = get_prediction(data)
     tweetsList, tagLists = randomPick(data, a)
@@ -46,9 +48,14 @@ def tweetsSearch(request, name):
     json_response = {'tweets': result, 'prediction': prediction}
     json_response = json.dumps(json_response)
     return HttpResponse(json_response, content_type="application/json")
+    '''
     # print(prediction)
     # tweetsRunningJob()
-    # findChange(name)
+    #addTopic()
+    findLatestTopic()
+    return
+
+
 
 
 def tweetsRunningJob():
@@ -63,10 +70,9 @@ def tweetsRunningJob():
         print(predictdata)
         resultlist.append(predictdata)
         topic = topicList[count]
-        historyRank = findChange(topic, count)
-        a = Topic(name=topic, rank=count + 1, positiveNumber=predictdata['positive'],
-                  neutralNumber=predictdata['neutral'],
-                  negativeNumber=predictdata['negative'], historyRank=historyRank)
+        a.neutralNumber = predictdata['neutral']
+        a.negativeNumber =predictdata['negative']
+        a.positiveNumber = predictdata['positive']
         count = count + 1
         a.save()
         print(a)
@@ -82,6 +88,7 @@ def findChange(topic, currentrank):
     if history == '':
         history = str(currentrank)
     return history
+
 
 
 '''
