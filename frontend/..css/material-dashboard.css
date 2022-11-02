@@ -10043,7 +10043,7 @@
   }
   
   .px-0 {
-    padding-right: 0 !important;
+    
     padding-left: 0 !important;
   }
   
@@ -25590,10 +25590,7 @@
     height: 3px;
   }
   
-  .table td,
-  .table th {
-    white-space: nowrap;
-  }
+ 
   
   .table.align-items-center td,
   .table.align-items-center th {

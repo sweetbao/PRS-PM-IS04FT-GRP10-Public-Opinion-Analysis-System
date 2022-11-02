@@ -1,14 +1,17 @@
+import random
+
 import requests
 from bs4 import BeautifulSoup
 import re
 import json
 from .dataClean import sentenceClean
 import time
+from pygtrans import Translate
 
 from .models import Topic
 
 bearer_token1 = 'AAAAAAAAAAAAAAAAAAAAAH6%2FhgEAAAAAC174stDAGI%2FLK7FVJCUdZNIXdr8%3DBddrVjoAkoV2erXv1tZCFWSM7oBYsotbCWWa56AmkVKADFnGHQ'
-bearer_token2 ='AAAAAAAAAAAAAAAAAAAAAB9aiQEAAAAAl%2BIItIjyrWrejGzyCIs%2FOpcaoHU%3DxEY2Of52bmPFcr4X0w7E6DUjtgHuG0TNT84zEQ7MP2yPJMb1Ab'
+bearer_token2 = 'AAAAAAAAAAAAAAAAAAAAAB9aiQEAAAAAl%2BIItIjyrWrejGzyCIs%2FOpcaoHU%3DxEY2Of52bmPFcr4X0w7E6DUjtgHuG0TNT84zEQ7MP2yPJMb1Ab'
 
 search_url = "https://api.twitter.com/2/tweets/counts/recent"
 
@@ -24,23 +27,31 @@ def is_contains_english(str):
     else:
         return False
 
+
 def get_latestTopic():
     res = requests.get('https://twitter-trends.iamrohit.in/singapore')
     res.encoding = 'utf-8'
     soup = BeautifulSoup(res.text, 'html.parser')
 
     topic_list = []
+    volume_list = []
     count = 1
     while len(topic_list) < 10:
         print(len(topic_list) + 1)
-        a = soup.find('a', class_="tweet", rank=count).text
+        fullText = soup.find('a', class_="tweet", rank=count)
+
+        a = fullText.text
+        b = fullText.get('tweetc')
+        volume_list.append(b)
         count = count + 1
         if is_contains_english(a):
-            a = a.replace('#','')
+            a = a.replace('#', '')
             topic_list.append(a)
             print(a)
+    volume_list = handleStr(volume_list)
 
-    return topic_list
+    return topic_list,volume_list
+
 
 def bearer_oauth(r):
     """
@@ -57,16 +68,16 @@ def bearer_oauth2(r):
     Method required by bearer token authentication.
     """
 
-
     r.headers["Authorization"] = f"Bearer {bearer_token2}"
     r.headers["User-Agent"] = "v2FilteredStreamPython"
     return r
 
+
 def get_rules(number):
     if number == 1:
-     response = requests.get(
-        "https://api.twitter.com/2/tweets/search/stream/rules", auth = bearer_oauth,
-    )
+        response = requests.get(
+            "https://api.twitter.com/2/tweets/search/stream/rules", auth=bearer_oauth,
+        )
     else:
         response = requests.get(
             "https://api.twitter.com/2/tweets/search/stream/rules", auth=bearer_oauth2,
@@ -79,7 +90,7 @@ def get_rules(number):
     return response.json()
 
 
-def delete_all_rules(rules,number):
+def delete_all_rules(rules, number):
     if rules is None or "data" not in rules:
         return None
 
@@ -106,7 +117,7 @@ def delete_all_rules(rules,number):
     print(json.dumps(response.json()))
 
 
-def set_rules(delete, trendings,number):
+def set_rules(delete, trendings, number):
     # You can adjust the rules if needed
 
     sample_rules = [
@@ -134,14 +145,16 @@ def set_rules(delete, trendings,number):
     print(json.dumps(response.json()))
 
 
-def get_stream(set,number,account):
+def get_stream(set, number, account):
+    client = Translate()
     dataSet = []
     startTime = time.perf_counter()
     print(startTime)
-    if account ==1:
-      response = requests.get(
-        "https://api.twitter.com/2/tweets/search/stream?tweet.fields=lang,referenced_tweets&expansions=referenced_tweets.id", auth=bearer_oauth, stream=True,
-    )
+    if account == 1:
+        response = requests.get(
+            "https://api.twitter.com/2/tweets/search/stream?tweet.fields=lang,referenced_tweets&expansions=referenced_tweets.id",
+            auth=bearer_oauth, stream=True,
+        )
     else:
         response = requests.get(
             "https://api.twitter.com/2/tweets/search/stream?tweet.fields=lang,referenced_tweets&expansions=referenced_tweets.id",
@@ -161,26 +174,31 @@ def get_stream(set,number,account):
             a = json.dumps(json_response, indent=4, sort_keys=True)
             tweetsText = str(json_response['includes']['tweets'][0]['text'])
             langage = str(json_response['data']['lang'])
-            #print(a)
-            if langage != 'en':
+            print(langage)
+
+            # print(a)
+            if langage in ['qme', 'qmt', 'und', 'hi', 'tl', 'und']:
                 continue
             if tweetsText.__contains__('RT @'):
-               try:
-                   tweetsText = json_response['includes']['tweets'][1]['text']
-               except:
-                   continue
+                try:
+                    tweetsText = json_response['includes']['tweets'][1]['text']
+                except:
+                    continue
+            texts = client.translate(tweetsText, target='en', fmt='text')
+            print('here is trans')
             tweetsText = sentenceClean(tweetsText)
+            print(tweetsText)
             dataSet.append(tweetsText)
             print(len(dataSet))
             if number == 199:
                 nowTime = time.perf_counter()
-                #print(nowTime-startTime)
-                #print(len(dataSet))
+                # print(nowTime-startTime)
+                # print(len(dataSet))
                 if nowTime - startTime > 180:
                     response.close()
                     return dataSet
-           # print(len(dataSet))
-            if number == 999 :
+            # print(len(dataSet))
+            if number == 999:
                 nowTime = time.perf_counter()
                 if nowTime - startTime > 300:
                     response.close()
@@ -188,7 +206,6 @@ def get_stream(set,number,account):
             if len(dataSet) > number:
                 response.close()
                 return dataSet
-
 
     return dataSet
 
@@ -202,19 +219,78 @@ def tweetsGet(trendings):
             number = 2
         rules = get_rules(number)
         delete = delete_all_rules(rules, number)
-        set = set_rules(delete, trendings[i],number)
-        target = get_stream(set,999,number)
+
+
+
+        set = set_rules(delete, trendings[i], number)
+        target = get_stream(set, 999, number)
+
         targetData.append(target)
-        print('finish '+str(trendings[i]))
+        print('finish ' + str(trendings[i]))
 
     return targetData
 
+
 def tweetSearch(keywords):
     rules = get_rules(1)
-    delete = delete_all_rules(rules,1)
+    delete = delete_all_rules(rules, 1)
     trendings = keywords
-    set = set_rules(delete, trendings,1)
-    target = get_stream(set,199,1)
+    set = set_rules(delete, trendings, 1)
+    target = get_stream(set, 199, 1)
     return target
 
 
+def randomPick(tweets: list, tags: list):
+    randomNumber = []
+    tweetsList = []
+    tagsResults = []
+    while len(randomNumber) < 30:
+        number = random.randint(0, len(tweets))
+        if not number in randomNumber:
+            randomNumber.append(number)
+    for i in randomNumber:
+        tweetsList.append(tweets[i])
+        tagsResults.append(tags[i])
+    return tweetsList, tagsResults
+
+
+def addTopic():
+    topicList,volumeList = get_latestTopic()
+    Topics = []
+    rank = 1
+    for i in range(0,len(topicList)):
+        topicN = Topic(rank=rank, name=topicList[i],volume = volumeList[i])
+        #topicN.save()
+        rank = rank + 1
+        Topics.append(topicN)
+    return Topics
+
+
+def countNumber(dataList):
+    positive = 0
+    neutral = 0
+    negative = 0
+
+    for data in dataList:
+        if data == 'Positive':
+            positive = positive + 1
+        elif data == 'Neutral':
+            neutral = neutral + 1
+        elif data == 'Negative':
+            negative = negative + 1
+
+    return {'positive': positive, 'neutral': neutral, 'negative': negative}
+
+
+def handleStr(numberlist: list):
+    result = []
+    for i in numberlist:
+        if i.startswith('Under'):
+            i = i.split(' ')[1]
+        num = float(i[:-1])
+        if i[-1] == 'K':
+            num = num * 1000
+        elif i[-1] == 'M':
+            num = num * 1000000
+        result.append(int(num))
+    return result

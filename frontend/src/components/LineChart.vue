@@ -26,20 +26,8 @@ export default {
 <template>
     <div class="table-resonsive">
       <Line :chart-data="chartData" :chart-options="chartOptions" />
-
+    </div>
 </template>
 
 
 
-<template>
-  <BarChart />
-</template>
-
-<script>
-import BarChart from 'path/to/component/BarChart'
-
-export default {
-  name: 'App',
-  components: { BarChart }
-}
-</script>

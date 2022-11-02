@@ -87,13 +87,14 @@ def main(args, raw_text):
 def infer(model, iterator, batch_size):
     model.eval()
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    res = []
-    for batch in iterator:
-        feature = batch['features'].to(device)
-        preds = model(feature)
-        while preds.shape[0] < batch_size:
-            preds = torch.cat((preds, preds[0].unsqueeze(0)), 0)
-        res.append(preds)
+    with torch.no_grad():
+        res = []
+        for batch in iterator:
+            feature = batch['features'].to(device)
+            preds = model(feature)
+            while preds.shape[0] < batch_size:
+                preds = torch.cat((preds, preds[0].unsqueeze(0)), 0)
+            res.append(preds)
 
     return torch.stack(res)
 

@@ -24,7 +24,7 @@ class Topic(models.Model):
     positiveNumber = models.IntegerField(null=True)
     negativeNumber = models.IntegerField(null=True)
     neutralNumber = models.IntegerField(null=True)
-    historyRank = models.TextField(default='')
+    volume = models.IntegerField(null=True)
 
     class Meta:
         db_table = "Topics"
