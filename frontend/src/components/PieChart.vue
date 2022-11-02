@@ -26,9 +26,9 @@ export default {
 <template>
   <div v-if="text===''" class="cocol-md-2"><Topic/></div> 
        <div class="row" v-else>
-    <div class="row mb-4">
+    <div class="row mb-4" style="position: fixed;width: 30%;">
         <div class="col-lg-12 col-md-6 mb-md-0 mb-2">
-          <div class="card">
+          <div class="card" style="position:fixed,width:50%">
             <div class="card-header pb-0">
               <div class="row">
                 <div class="col-lg-6 col-7">
