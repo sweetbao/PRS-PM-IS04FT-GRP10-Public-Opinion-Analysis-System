@@ -1,12 +1,13 @@
-import time
+import json
 
+from django.core import serializers
 from django.http import HttpResponse
 from django.shortcuts import render
 from rest_framework import viewsets
 from rest_framework import generics
 from .models import Tweet, Topic
 from .serializers import TweetSerializer, TopicSerializer
-from .service import get_latestTopic, tweetSearch, tweetsGet
+from .service import get_latestTopic, tweetSearch, tweetsGet,randomPick
 from .SentimentModel.infer import get_prediction
 from apscheduler.schedulers.background import BackgroundScheduler
 from django_apscheduler.jobstores import DjangoJobStore, register_job, register_events
@@ -44,14 +45,17 @@ def addTopic():
 
 
 def tweetsSearch(request, name):
-    # data = tweetSearch(name)
-    # a = get_prediction(data)
-    # prediction = countNumber(a)
+    data = tweetSearch(name)
+    tweetsList = randomPick(data)
+    a = get_prediction(data)
+    print(a)
+    prediction = countNumber(a)
+    json_response = {'tweets':tweetsList,'prediction':prediction}
+    json_response = json.dumps(json_response)
+    return HttpResponse(json_response, content_type="application/json")
     # print(prediction)
-    tweetsRunningJob()
-    #findChange(name)
-
-    return HttpResponse('添加成功')
+    # tweetsRunningJob()
+    # findChange(name)
 
 
 def tweetsRunningJob():
@@ -66,10 +70,10 @@ def tweetsRunningJob():
         print(predictdata)
         resultlist.append(predictdata)
         topic = topicList[count]
-        historyRank = findChange(topic,count)
-        a = Topic(name=topic, rank=count+1, positiveNumber=predictdata['positive'],
+        historyRank = findChange(topic, count)
+        a = Topic(name=topic, rank=count + 1, positiveNumber=predictdata['positive'],
                   neutralNumber=predictdata['neutral'],
-                  negativeNumber=predictdata['negative'],historyRank = historyRank)
+                  negativeNumber=predictdata['negative'], historyRank=historyRank)
         count = count + 1
         a.save()
         print(a)
@@ -93,7 +97,7 @@ def countNumber(dataList):
     return {'positive': positive, 'neutral': neutral, 'negative': negative}
 
 
-def findChange(topic,currentRank):
+def findChange(topic, currentRank):
     listTopic = Topic.objects.filter(name=topic).order_by('time')
     history = ''
     for topic in listTopic:
@@ -103,6 +107,11 @@ def findChange(topic,currentRank):
     return history
 
 
+
+
+
+
+'''
 try:
     scheduler = BackgroundScheduler()
     scheduler.add_jobstore(DjangoJobStore(), "default", replace_existing=True)
@@ -115,4 +124,4 @@ try:
     scheduler.start()
 
 except Exception as e:
-    print('定时任务异常：%s' % str(e))
+    print('定时任务异常：%s' % str(e))'''

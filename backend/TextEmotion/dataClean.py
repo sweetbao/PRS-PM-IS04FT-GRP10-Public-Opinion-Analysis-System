@@ -10,7 +10,7 @@ def sentenceClean(sentence):
     # replace the \n and tag
     sentence = re.sub(r'[(\n)]', ' ', sentence)
     sentence = filter_emoji(sentence)
-    sentence = filter_kor(sentence)
+    #sentence = filter_kor(sentence)
     sentence = specialEmoji(sentence)
 
 
