@@ -54,6 +54,7 @@ def tweetsSearch(request, name):
         dic = {'text': text[i], 'tags': a[i],'like':like[i]}
         result.append(dic)
     print(a)
+    result = sorted(result,key=lambda t:t['like'])
     prediction = countNumber(a)
     json_response = {'tweets': result, 'prediction': prediction}
     json_response = json.dumps(json_response)
