@@ -41,11 +41,6 @@ class TopicViewSet(viewsets.ModelViewSet):
 
 def tweetsSearch(request, name):
 
-    tweetsRunningJob()
-    return HttpResponse(status=200)
-
-
-'''
     data = tweetSearch(name)
     data = sorted(data,key=lambda t:t[1],reverse=True)
     text = []
@@ -63,6 +58,10 @@ def tweetsSearch(request, name):
     json_response = {'tweets': result, 'prediction': prediction}
     json_response = json.dumps(json_response)
     return HttpResponse(json_response, content_type="application/json")
+    '''
+        tweetsRunningJob()
+        return HttpResponse(status=200)
+    '''
 
 
     # print(prediction)
