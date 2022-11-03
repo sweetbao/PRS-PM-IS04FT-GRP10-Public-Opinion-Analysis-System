@@ -152,7 +152,7 @@ def get_stream(set, number, account):
     print(startTime)
     if account == 1:
         response = requests.get(
-            "https://api.twitter.com/2/tweets/search/stream?tweet.fields=lang,referenced_tweets&expansions=referenced_tweets.id",
+            "https://api.twitter.com/2/tweets/search/stream?tweet.fields=lang,public_metrics,referenced_tweets&expansions=referenced_tweets.id&media.fields=public_metrics",
             auth=bearer_oauth, stream=True,
         )
     else:
@@ -176,7 +176,7 @@ def get_stream(set, number, account):
             langage = str(json_response['data']['lang'])
             print(langage)
 
-            # print(a)
+            print(a)
             if langage in ['qme', 'qmt', 'und', 'hi', 'tl', 'und']:
                 continue
             if tweetsText.__contains__('RT @'):
