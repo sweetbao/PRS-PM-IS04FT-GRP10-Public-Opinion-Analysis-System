@@ -40,12 +40,12 @@ class TopicViewSet(viewsets.ModelViewSet):
             return super().get_queryset()
 
 def tweetsSearch(request, name):
-    '''
+
     tweetsRunningJob()
     return HttpResponse(status=200)
-    '''
 
 
+'''
     data = tweetSearch(name)
     data = sorted(data,key=lambda t:t[1],reverse=True)
     text = []
@@ -102,15 +102,16 @@ def tweetsRunningJob():
         nameList.append(topic.name)
 
     allList = tweetsGet(nameList)
+    print(len(allList))
     resultlist = []
     count = 0
     for i in range(0,len(allList),1):
         list = allList[i]
         text = []
         like = []
-        for i in  range(0,len(list),1):
-            text.append(list[i][0])
-            like.append(list[i][1])
+        for m in  range(0,len(list),1):
+            text.append(list[m][0])
+            like.append(list[m][1])
         result = get_prediction(text)
         predictdata = countNumber(result)
         print(predictdata)
@@ -126,9 +127,8 @@ def tweetsRunningJob():
         if len(text)<30:
             require = len(text)
         for j in range(0,require,1):
-            tweet = Tweet(topic = topicList[i],like = like[j],comment = text[j],attitude = text[j])
+            tweet = Tweet(topic = nameList[i],like = like[j],comment = text[j],attitude = result[j])
             tweet.save()
-
     return resultlist
 '''
 try:

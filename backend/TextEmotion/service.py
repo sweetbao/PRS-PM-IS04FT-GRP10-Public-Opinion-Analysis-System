@@ -20,6 +20,8 @@ query_params = {'query': 'from:twitterdev', 'granularity': 'day'}
 
 
 def is_contains_english(str):
+    if len(str) > 20:
+        return False
     my_re = re.compile(r'[A-Za-z]', re.S)
     res = re.findall(my_re, str)
     if len(res):
@@ -193,6 +195,8 @@ def get_stream(set, number, account):
             print('here is trans')
             print(texts)
             tweetsText = sentenceClean(texts)
+            if tweetsText == '':
+                continue
             print(tweetsText)
             dataSet.append((tweetsText, like))
             print(len(dataSet))
@@ -221,7 +225,7 @@ def get_stream(set, number, account):
 
 def tweetsGet(trendings):
     targetData = []
-    for i in range(0, 10,1):
+    for i in range(0, 10, 1):
         if i < 5:
             number = 2
         else:
@@ -233,7 +237,7 @@ def tweetsGet(trendings):
         print(number)
         set = set_rules(delete, trendings[i], number)
         print('good')
-        target = get_stream(set, 49, number)
+        target = get_stream(set, 199, number)
 
         targetData.append(target)
         print('finish ' + str(trendings[i]))
@@ -248,8 +252,6 @@ def tweetSearch(keywords):
     set = set_rules(delete, trendings, 1)
     target = get_stream(set, 199, 1)
     return target
-
-
 
 
 def addTopic():
