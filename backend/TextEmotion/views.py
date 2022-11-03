@@ -83,8 +83,7 @@ def getText(request, id):
         data = {'like': i.like, 'comment': i.comment, 'attitude': i.attitude}
         tweetsList.append(data)
     data = {'rank':rank,'name':name,'positiveNumber':positiveNumber,'negativeNumber':negativeNumber,'neutralNumber':neutralNumber}
-
-
+    data = sorted(data,key=lambda t:t['rank'])
     jsonfile = {'tweets':tweetsList,'topic':data}
     json_str = json.dumps(jsonfile)
     return HttpResponse(json_str, content_type="application/json")
