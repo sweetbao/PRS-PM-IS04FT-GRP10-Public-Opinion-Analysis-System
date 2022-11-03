@@ -7,7 +7,7 @@ from rest_framework import viewsets
 from rest_framework import generics
 from .models import Tweet, Topic
 from .serializers import TweetSerializer, TopicSerializer
-from .service import get_latestTopic, tweetSearch, tweetsGet, randomPick, addTopic, countNumber
+from .service import get_latestTopic, tweetSearch, tweetsGet,  addTopic, countNumber
 from .SentimentModel.infer import get_prediction
 from apscheduler.schedulers.background import BackgroundScheduler
 from django_apscheduler.jobstores import DjangoJobStore, register_job, register_events
@@ -35,7 +35,10 @@ class TopicViewSet(viewsets.ModelViewSet):
 
 
 def tweetsSearch(request, name):
+    tweetsRunningJob()
+    return HttpResponse(status=200)
 
+'''
     data = tweetSearch(name)
     data = sorted(data,key=lambda t:t[1],reverse=True)
     text = []
@@ -53,12 +56,20 @@ def tweetsSearch(request, name):
     json_response = {'tweets': result, 'prediction': prediction}
     json_response = json.dumps(json_response)
     return HttpResponse(json_response, content_type="application/json")
+'''
 
     # print(prediction)
-    # tweetsRunningJob()
+
     #addTopic()
 
-    return
+   # return HttpResponse(status=200)
+
+def getText(request, id):
+    topic = Topic.objects.get(id = id)
+    tweets = Tweet.objects.filter(topic = topic.name)
+    json_data = serializers.serialize('json', tweets)
+    return HttpResponse(json_data, content_type="application/json")
+
 
 
 
@@ -66,11 +77,21 @@ def tweetsSearch(request, name):
 def tweetsRunningJob():
     print("start to fetch")
     topicList = addTopic()
-    allList = tweetsGet(topicList)
+    nameList = []
+    for topic in topicList:
+        nameList.append(topic.name)
+
+    allList = tweetsGet(nameList)
     resultlist = []
     count = 0
-    for list in allList:
-        result = get_prediction(list)
+    for i in range(0,len(allList),1):
+        list = allList[i]
+        text = []
+        like = []
+        for i in  range(0,len(list),1):
+            text.append(list[i][0])
+            like.append(list[i][1])
+        result = get_prediction(text)
         predictdata = countNumber(result)
         print(predictdata)
         resultlist.append(predictdata)
@@ -81,16 +102,22 @@ def tweetsRunningJob():
         count = count + 1
         a.save()
         print(a)
-        picktweets,pickTags = randomPick(list,result)
-        for i in range(0,len(picktweets),1):
-            Tweet()
+        require = 30
+        if len(text)<30:
+            require = len(text)
+        for j in range(0,require,1):
+            tweet = Tweet(topic = topicList[i],like = like[j],comment = text[j],attitude = text[j])
+            tweet.save()
 
     return resultlist
-
-
-
-
 '''
+try:
+    tweetsRunningJob()
+except Exception as  e :
+    print(e)
+
+
+
 try:
     scheduler = BackgroundScheduler()
     scheduler.add_jobstore(DjangoJobStore(), "default", replace_existing=True)

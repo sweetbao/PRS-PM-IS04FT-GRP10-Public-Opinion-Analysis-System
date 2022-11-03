@@ -157,7 +157,7 @@ def get_stream(set, number, account):
         )
     else:
         response = requests.get(
-            "https://api.twitter.com/2/tweets/search/stream?tweet.fields=lang,referenced_tweets&expansions=referenced_tweets.id",
+            "https://api.twitter.com/2/tweets/search/stream?tweet.fields=lang,public_metrics,referenced_tweets&expansions=referenced_tweets.id&media.fields=public_metrics",
             auth=bearer_oauth2, stream=True,
         )
     print(response.status_code)
@@ -184,7 +184,11 @@ def get_stream(set, number, account):
                     tweetsText = json_response['includes']['tweets'][1]['text']
                 except:
                     continue
-            texts = client.translate(tweetsText, target='en', fmt='text').translatedText
+            texts = client.translate(tweetsText, target='en', fmt='text')
+            if not texts is None:
+                texts = texts.translatedText
+            else:
+                continue
             print(tweetsText)
             print('here is trans')
             print(texts)
@@ -198,15 +202,18 @@ def get_stream(set, number, account):
                 # print(len(dataSet))
                 if nowTime - startTime > 180:
                     response.close()
+                    dataSet = sorted(dataSet, key=lambda t: t[1], reverse=True)
                     return dataSet
             # print(len(dataSet))
             if number == 999:
                 nowTime = time.perf_counter()
                 if nowTime - startTime > 300:
                     response.close()
+                    dataSet = sorted(dataSet, key=lambda t: t[1], reverse=True)
                     return dataSet
             if len(dataSet) > number:
                 response.close()
+                dataSet = sorted(dataSet, key=lambda t: t[1], reverse=True)
                 return dataSet
 
     return dataSet
@@ -214,16 +221,19 @@ def get_stream(set, number, account):
 
 def tweetsGet(trendings):
     targetData = []
-    for i in range(0, 10):
-        if i < 4:
-            number = 1
-        else:
+    for i in range(0, 10,1):
+        if i < 5:
             number = 2
+        else:
+            number = 1
         rules = get_rules(number)
         delete = delete_all_rules(rules, number)
-
+        print(delete)
+        print(trendings[i])
+        print(number)
         set = set_rules(delete, trendings[i], number)
-        target = get_stream(set, 999, number)
+        print('good')
+        target = get_stream(set, 199, number)
 
         targetData.append(target)
         print('finish ' + str(trendings[i]))
@@ -240,13 +250,6 @@ def tweetSearch(keywords):
     return target
 
 
-def randomPick(tweets: list, tags: list):
-    tweetsList = []
-    tagsResults = []
-    for i in range(0,30,1):
-        tweetsList.append(tweets[i])
-        tagsResults.append(tags[i])
-    return tweetsList, tagsResults
 
 
 def addTopic():
