@@ -50,7 +50,7 @@ def get_latestTopic():
             print(a)
     volume_list = handleStr(volume_list)
 
-    return topic_list,volume_list
+    return topic_list, volume_list
 
 
 def bearer_oauth(r):
@@ -174,21 +174,23 @@ def get_stream(set, number, account):
             a = json.dumps(json_response, indent=4, sort_keys=True)
             tweetsText = str(json_response['includes']['tweets'][0]['text'])
             langage = str(json_response['data']['lang'])
+            like = json_response['data']['public_metrics']['like_count']
             print(langage)
-
-            print(a)
-            if langage in ['qme', 'qmt', 'und', 'hi', 'tl', 'und']:
+            # print(a)
+            if langage in ['qme', 'qmt', 'und', 'hi', 'tl', 'und', 'art']:
                 continue
             if tweetsText.__contains__('RT @'):
                 try:
                     tweetsText = json_response['includes']['tweets'][1]['text']
                 except:
                     continue
-            texts = client.translate(tweetsText, target='en', fmt='text')
-            print('here is trans')
-            tweetsText = sentenceClean(tweetsText)
+            texts = client.translate(tweetsText, target='en', fmt='text').translatedText
             print(tweetsText)
-            dataSet.append(tweetsText)
+            print('here is trans')
+            print(texts)
+            tweetsText = sentenceClean(texts)
+            print(tweetsText)
+            dataSet.append((tweetsText, like))
             print(len(dataSet))
             if number == 199:
                 nowTime = time.perf_counter()
@@ -220,8 +222,6 @@ def tweetsGet(trendings):
         rules = get_rules(number)
         delete = delete_all_rules(rules, number)
 
-
-
         set = set_rules(delete, trendings[i], number)
         target = get_stream(set, 999, number)
 
@@ -241,26 +241,21 @@ def tweetSearch(keywords):
 
 
 def randomPick(tweets: list, tags: list):
-    randomNumber = []
     tweetsList = []
     tagsResults = []
-    while len(randomNumber) < 30:
-        number = random.randint(0, len(tweets))
-        if not number in randomNumber:
-            randomNumber.append(number)
-    for i in randomNumber:
+    for i in range(0,30,1):
         tweetsList.append(tweets[i])
         tagsResults.append(tags[i])
     return tweetsList, tagsResults
 
 
 def addTopic():
-    topicList,volumeList = get_latestTopic()
+    topicList, volumeList = get_latestTopic()
     Topics = []
     rank = 1
-    for i in range(0,len(topicList)):
-        topicN = Topic(rank=rank, name=topicList[i],volume = volumeList[i])
-        #topicN.save()
+    for i in range(0, len(topicList)):
+        topicN = Topic(rank=rank, name=topicList[i], volume=volumeList[i])
+        # topicN.save()
         rank = rank + 1
         Topics.append(topicN)
     return Topics
