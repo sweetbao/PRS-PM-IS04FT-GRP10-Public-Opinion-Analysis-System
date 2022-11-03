@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
-from TextEmotion.views import TweetViewSet,TopicViewSet,addTopic,tweetsSearch,getText
+from TextEmotion.views import TweetViewSet,TopicViewSet,addTopic,tweetsSearch,getText,getTopic
 
 
 router = routers.DefaultRouter()
@@ -31,5 +31,6 @@ urlpatterns = [
     path('api/',include(router.urls)),
     path('topic/fetch/', addTopic),
     path('tweet/search/<name>', tweetsSearch),
-    path('tweets/<id>', getText)
+    path('tweets/<id>', getText),
+    path('getTopic/',getTopic)
 ]

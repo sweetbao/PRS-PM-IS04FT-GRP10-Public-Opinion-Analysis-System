@@ -91,6 +91,21 @@ def getText(request, id):
     return HttpResponse(json_str, content_type="application/json")
 
 
+def getTopic(request):
+    queryset = Topic.objects.all().order_by('-time')
+    a = queryset[:10]
+    topicList = []
+    for t in a:
+        dic = {'rank':t.rank,'name':t.name,'positiveNumber':t.positiveNumber,'negativeNumber':t.negativeNumber,'neutralNumber':t.neutralNumber}
+        topicList.append(dic)
+    result = sorted(topicList,key=lambda t:t['rank'])
+
+    json_response = {'topics': result}
+    json_response = json.dumps(json_response)
+    return HttpResponse(json_response, content_type="application/json")
+
+
+
 
 
 
