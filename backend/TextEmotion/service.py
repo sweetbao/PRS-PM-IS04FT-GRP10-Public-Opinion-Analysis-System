@@ -233,7 +233,7 @@ def tweetsGet(trendings):
         print(number)
         set = set_rules(delete, trendings[i], number)
         print('good')
-        target = get_stream(set, 199, number)
+        target = get_stream(set, 49, number)
 
         targetData.append(target)
         print('finish ' + str(trendings[i]))

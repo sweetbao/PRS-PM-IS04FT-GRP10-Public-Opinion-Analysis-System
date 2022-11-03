@@ -35,10 +35,12 @@ class TopicViewSet(viewsets.ModelViewSet):
 
 
 def tweetsSearch(request, name):
+    '''
     tweetsRunningJob()
     return HttpResponse(status=200)
+    '''
 
-'''
+
     data = tweetSearch(name)
     data = sorted(data,key=lambda t:t[1],reverse=True)
     text = []
@@ -56,19 +58,32 @@ def tweetsSearch(request, name):
     json_response = {'tweets': result, 'prediction': prediction}
     json_response = json.dumps(json_response)
     return HttpResponse(json_response, content_type="application/json")
-'''
+
 
     # print(prediction)
 
     #addTopic()
 
-   # return HttpResponse(status=200)
+   # return HttpResponse(status=200)'''
 
 def getText(request, id):
     topic = Topic.objects.get(id = id)
     tweets = Tweet.objects.filter(topic = topic.name)
-    json_data = serializers.serialize('json', tweets)
-    return HttpResponse(json_data, content_type="application/json")
+    rank = topic.rank
+    name = topic.name
+    positiveNumber = topic.positiveNumber
+    negativeNumber = topic.negativeNumber
+    neutralNumber = topic.neutralNumber
+    tweetsList = []
+    for i in tweets:
+        data = {'like': i.like, 'comment': i.comment, 'attitude': i.attitude}
+        tweetsList.append(data)
+    data = {'rank':rank,'name':name,'positiveNumber':positiveNumber,'negativeNumber':negativeNumber,'neutralNumber':neutralNumber}
+
+
+    jsonfile = {'tweets':tweetsList,'topic':data}
+    json_str = json.dumps(jsonfile)
+    return HttpResponse(json_str, content_type="application/json")
 
 
 
