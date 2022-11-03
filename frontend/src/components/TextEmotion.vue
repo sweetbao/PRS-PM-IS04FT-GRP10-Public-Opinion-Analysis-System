@@ -4,7 +4,7 @@ import { reactive, onMounted, toRefs, watch } from "vue";
 import useEventsBus from "./eventbus";
 import PieChart from "./PieChart.vue";
 import Topic from "./Topic.vue";
-import Barchart from "./Barchart.vue";
+
 import Loading from "./Loading.vue";
 
 export default {
@@ -12,7 +12,6 @@ export default {
   components: {
     PieChart,
     Topic,
-    Barchart,
     Loading
   },
   setup() {
@@ -217,7 +216,7 @@ export default {
         </div>
       </div>
     </div>
-    <div v-if="text === ''" style="position: fixed; right: 20px; left: 65%">
+    <!-- <div v-if="text === ''" style="position: fixed; right: 20px; left: 65%">
       <Barchart :chart-data="{
         labels: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
         datasets: [{
@@ -226,7 +225,7 @@ export default {
           data: [testNumber, 20, 12, 20, 20, 20, 20, 20, 20, 20]
         }]
       }" />
-    </div>
+    </div> -->
   </div>
 
 

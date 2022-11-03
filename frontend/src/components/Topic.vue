@@ -3,14 +3,16 @@ import axios from 'axios'
 import { reactive, onMounted, toRefs } from 'vue'
 import useEventsBus from './eventbus'
 import router from '../router'
-
+import BarChart from '../components/Barchart.vue'
 
 
 
 
 export default {
   name: 'Topics',
-
+  components: {
+    BarChart,
+  },
   methods: {
     selectTopic(topicname) {
       EventBus.assign(topicname);
@@ -35,9 +37,10 @@ export default {
 
 
     const getTopic = () => {
-      axios.get(base_url).then(res => {
+      axios.get(base_url+'?isLatest=True').then(res => {
         state.Topic_list = res.data;
-        state.Topic = Object.assign({}, Topic_blank)
+        state.Topic = Object.assign({}, Topic_blank);
+        
       }).catch(err => {
         console.log(err);
       })
@@ -51,7 +54,7 @@ export default {
 
     onMounted(() => {
       getTopic();
-
+    console.log(state.Topic_list);
     });
 
     return {
@@ -66,6 +69,16 @@ export default {
 </script>
 
 <template>
+   <div style="position: fixed; right: 20px; left: 65%">
+      <BarChart :chart-data="{
+        labels: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
+        datasets: [{
+          label: 'Tweets Amount',
+          backgroundColor: '#f87979',
+          data: [testNumber, 20, 12, 20, 20, 20, 20, 20, 20, 20]
+        }]
+      }" />
+    </div>
   <div class="row">
     <div class="row mb-12" style="min-width: 200%;max-width: 400px;">
       <div class="col-lg-11 col-md-12 ">
@@ -92,11 +105,8 @@ export default {
                   <li v-for="item in Topic_list.slice().reverse()" :key="item.url" @click="selectT(item.name)"
                     class="alert alert-primary alert-dismissible text-white">
                     {{ item.name }}
-                  </li>
+                    </li>
                 </ol>
-                <div v-if="text === ''" style="position: absolute;right: 20PX;left: 950PX;">
-                  <Barchart />
-                </div>
               </div>
             </div>
           </div>

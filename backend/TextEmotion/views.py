@@ -30,9 +30,14 @@ class TweetViewSet(viewsets.ModelViewSet):
 
 class TopicViewSet(viewsets.ModelViewSet):
     queryset = Topic.objects.all().order_by('-time')
-    queryset = queryset[:10]
+ 
     serializer_class = TopicSerializer
-
+    def get_queryset(self):
+        Latest = self.request.query_params.get("isLatest", None)
+        if Latest:
+            return super().get_queryset()[:10]
+        else:
+            return super().get_queryset()
 
 def tweetsSearch(request, name):
     '''
