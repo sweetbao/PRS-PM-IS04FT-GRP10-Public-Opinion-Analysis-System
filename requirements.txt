@@ -44,3 +44,4 @@ nltk~=3.7
 pytorch_transformers==1.2.0
 pytorch_pretrained_bert==0.6.2
 Django_apscheduler==0.6.2
+pygtrans==1.4.0

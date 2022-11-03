@@ -1,21 +1,20 @@
 <script>
-import TextEmotion from '../components/TextEmotion.vue'
+
+import History from '../components/History.vue'
 
 export default {
     name: 'TopicView',
     components: {
-      TextEmotion,
+      History,
+        
     }
 
   }
-
-
-
 
 </script>
 
 <template>
   <main>
-  <TextEmotion/>
+    <History />
   </main>
 </template>
