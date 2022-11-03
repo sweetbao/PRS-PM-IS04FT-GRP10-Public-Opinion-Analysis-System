@@ -2,7 +2,7 @@
 import axios from 'axios'
 import { reactive, onMounted, toRefs  } from 'vue'
 import useEventsBus from './eventbus' 
-
+import router from '../router'
 
 
 
@@ -14,6 +14,7 @@ export default {
   methods:{
       selectTopic(topicname){
          EventBus.assign( topicname);
+         router.push({ name: 'Paper'});
       }
 
     },
@@ -66,7 +67,7 @@ export default {
       <div class="row">
           <div class="row mb-12">
               <div class="col-lg-11 col-md-12 mb-md-12 mb-12">
-                <div class="card">
+                <div class="card" style="width:200%">
                   <div class="card-header pb-0">
                     <div class="row">
                       <div class="col-lg-50 col-50">
@@ -90,6 +91,9 @@ export default {
    {{ item.name }} 
   </li>
 </ol>
+<div v-if="text===''" style="position: absolute;right: 20PX;left: 950PX;">
+    <Barchart />
+    </div>
   </div>
 </div>
 </div>

@@ -1,13 +1,13 @@
 <script >
 import { RouterLink, RouterView } from 'vue-router'
-import TextEmotion from './components/TextEmotion.vue'
+
 
 
 
 export default {
   name:'App',
   components:{
-    TextEmotion,
+  
     
 }
 }
@@ -17,6 +17,6 @@ export default {
 <template>
   <div style="display:flex">
     
-   <div class="cocol-md-10"><TextEmotion/></div>
+   <div class="cocol-md-10"><RouterView /></div>
 </div>
 </template>
