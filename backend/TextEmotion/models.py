@@ -4,10 +4,10 @@ from django.db import models
 
 # Create your models here.
 class Tweet(models.Model):
-    title = models.CharField(max_length=100)
-    author = models.CharField(max_length=50)
+    topic = models.CharField(max_length=100)
+    like = models.IntegerField(null=True)
     comment = models.TextField()
-    attitude=models.CharField(max_length=50)
+    attitude = models.CharField(max_length=50)
     retrievetime = models.DateTimeField(auto_now_add=True)
 
     class Meta:

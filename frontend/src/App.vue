@@ -15,8 +15,8 @@ export default {
 </script>
 
 <template>
-  <div style="display:flex">
+  
     
-   <div class="cocol-md-10"><RouterView /></div>
-</div>
+ <RouterView />
+
 </template>

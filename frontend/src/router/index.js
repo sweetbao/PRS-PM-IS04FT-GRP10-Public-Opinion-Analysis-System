@@ -1,6 +1,6 @@
 import { createRouter, createWebHashHistory, createWebHistory } from 'vue-router'
 import TopicView from '../views/TopicView.vue'
-import TweetsView from '../views/TweetsView.vue'
+import HistoryView from '../views/HistoryView.vue'
 
 
 const routes = [
@@ -10,9 +10,9 @@ const routes = [
     component: TopicView,
   },
   {
-    path: "/Tweets/",
-    name: "Tweets",
-    component: TweetsView
+    path: "/History/",
+    name: "history",
+    component: HistoryView
   },
 ];
 

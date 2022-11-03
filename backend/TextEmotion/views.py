@@ -35,24 +35,29 @@ class TopicViewSet(viewsets.ModelViewSet):
 
 
 def tweetsSearch(request, name):
-    '''
+
     data = tweetSearch(name)
-    a = get_prediction(data)
-    tweetsList, tagLists = randomPick(data, a)
+    data = sorted(data,key=lambda t:t[1],reverse=True)
+    text = []
+    like = []
+    for i in range(0,len(data),1):
+        text.append(data[i][0])
+        like.append(data[i][1])
+    a = get_prediction(text)
     result = []
-    for i in range(0, len(tweetsList), 1):
-        dic = {'text': tweetsList[i], 'tags': tagLists[i]}
+    for i in range(0, 30, 1):
+        dic = {'text': text[i], 'tags': a[i],'like':like[i]}
         result.append(dic)
     print(a)
     prediction = countNumber(a)
     json_response = {'tweets': result, 'prediction': prediction}
     json_response = json.dumps(json_response)
     return HttpResponse(json_response, content_type="application/json")
-    '''
+
     # print(prediction)
     # tweetsRunningJob()
     #addTopic()
-    findLatestTopic()
+
     return
 
 
@@ -69,25 +74,19 @@ def tweetsRunningJob():
         predictdata = countNumber(result)
         print(predictdata)
         resultlist.append(predictdata)
-        topic = topicList[count]
+        a = topicList[count]
         a.neutralNumber = predictdata['neutral']
         a.negativeNumber =predictdata['negative']
         a.positiveNumber = predictdata['positive']
         count = count + 1
         a.save()
         print(a)
+        picktweets,pickTags = randomPick(list,result)
+        for i in range(0,len(picktweets),1):
+            Tweet()
 
     return resultlist
 
-
-def findChange(topic, currentrank):
-    listTopic = Topic.objects.filter(name=topic).order_by('time')
-    history = ''
-    for topic in listTopic:
-        history = history + str(topic.rank)
-    if history == '':
-        history = str(currentrank)
-    return history
 
 
 

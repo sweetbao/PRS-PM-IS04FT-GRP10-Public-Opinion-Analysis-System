@@ -12,6 +12,7 @@ def sentenceClean(sentence):
     sentence = filter_emoji(sentence)
     #sentence = filter_kor(sentence)
     sentence = specialEmoji(sentence)
+    #sentence = sentence.replace('TranslateResponse translatedText ','')
 
 
     return sentence
