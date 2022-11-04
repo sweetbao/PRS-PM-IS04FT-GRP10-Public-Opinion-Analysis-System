@@ -51,7 +51,7 @@ def tweetsSearch(request, name):
     a = get_prediction(text)
     result = []
     for i in range(0, 30, 1):
-        dic = {'text': text[i], 'tags': a[i],'like':like[i]}
+        dic = {'comment': text[i], 'attitude': a[i],'like':like[i]}
         result.append(dic)
     print(a)
     result = sorted(result,key=lambda t:t['like'])

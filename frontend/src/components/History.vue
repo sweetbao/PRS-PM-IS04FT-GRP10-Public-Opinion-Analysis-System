@@ -12,10 +12,7 @@ export default {
   name: 'Topics',
 
   methods: {
-    selectTopic(topicname) {
-      EventBus.assign(topicname);
-      router.push({ name: 'Paper' });
-    },
+    
    
     dateTime(value) {
       return moment(value).format("DD/MM/YYYY hh:mm:ss");
@@ -49,10 +46,7 @@ export default {
       })
     };
 
-    const selectT = (text) => {
-      emit('selectedtopic', text)
-
-    }
+  
 
     const filterdata=(data)=>{
   
@@ -81,7 +75,7 @@ export default {
 
     return {
       ...toRefs(state),
-      selectT,
+
       
       filterdata,
       reassign
@@ -106,7 +100,7 @@ export default {
               </div>
               <div class="col-lg-12 col-12 my-auto text-end">
                 <input placeholder="filter value" v-model="currentFilterValue" />
-                <input type="submit" value="filter" @click="reassign()">
+                <input type="submit" value="Filter" @click="reassign()">
               </div>
             </div>
           </div>
@@ -115,11 +109,13 @@ export default {
               <!-- <table class="table align-items-center mb-0"> -->
               <div>
                 <ol>
-                  <li v-for="item in fliter_list" :key="item.url" @click="selectT(item.name)"
+                  <li v-for="item in fliter_list" :key="item.url"
                     class="alert alert-primary alert-dismissible text-white">
+                    <div style="color: gold;">
                     {{item.rank}}. {{ item.name }} -  <span>Record time: </span>{{dateTime( item.time)}} - <span>Amount: </span>{{item.volume}} - 
                     <span>Positive: </span> {{100* Number(item.positiveNumber) /(Number(item.negativeNumber)+Number(item.positiveNumber)+Number(item.neutralNumber))}}% - 
                     <span>Negative: </span> {{100*Number(item.negativeNumber) /(Number(item.negativeNumber)+Number(item.positiveNumber)+Number(item.neutralNumber))}}%
+                  </div>
                   </li>
                 </ol>
                 

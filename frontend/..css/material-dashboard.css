@@ -25570,10 +25570,10 @@
   }
   
   .table thead th {
-    padding: 0.75rem 1.5rem;
+   
     text-transform: capitalize;
     letter-spacing: 0px;
-    border-bottom: 1px solid #f0f2f5;
+    border-bottom: 1px solid black;
   }
   
   .table th {

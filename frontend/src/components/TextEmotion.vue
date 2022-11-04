@@ -15,112 +15,104 @@ export default {
     Loading
   },
   setup() {
-    let base_url = "http://127.0.0.1:8000/api/Tweets/";
-    const TE_blank = {
-      url: "",
-      title: "",
-      author: "",
-      comment: "",
-      attitude: 0,
-      topic: "",
+    let base_url = "http://127.0.0.1:8000/";
+    const Topic_blank = {
+      rank: "",
+      name: "",
+      postive: Number,
+      negative: Number,
+      neutral: Number,
     };
     const state = reactive({
-      Tweet_list: [],
-      Tweet: Object.assign({}, TE_blank),
-      text: "",
-      testNumber: 0,
+      Tweets_list: [],
+      Topic: Object.assign({}, Topic_blank),
+      Id: "",
+      SearchText: "",
+      text:""
     });
-    const getTweet = () => {
+
+
+
+    const getTweetbyId = () => {
       axios
-        .get(base_url + "?title=" + state.text)
+        .get(base_url + "tweets/" + state.Id)
         .then((res) => {
-          state.Tweet_list = res.data;
-          state.testNumber = state.Tweet_list[0].attitude;
-          state.Tweet = Object.assign({}, TE_blank);
+          state.Tweets_list = res.data.tweets;
+          state.Topic.name = res.data.topic.name;
+          state.Topic.rank = res.data.topic.rank;
+          state.Topic.postive = Number(res.data.topic.positiveNumber);
+          state.Topic.negative = Number(res.data.topic.negativeNumber);
+          state.Topic.neutral = Number(res.data.topic.neutralNumber);
         })
         .catch((err) => {
           console.log(err);
         });
     };
 
-    const { bus } = useEventsBus();
+
+    const getTweetbyText = () => {
+      axios
+        .get(base_url + "tweet/search/" + state.text)
+        .then((res) => {
+        
+          state.Tweets_list = res.data.tweets;
+          state.Topic.name = state.SearchText;
+          state.Topic.postive = Number(res.data.prediction.positive);
+          state.Topic.negative = Number(res.data.prediction.negative);
+          state.Topic.neutral = Number(res.data.prediction.neutral);
+          console.log(state.Tweets_list)
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    };
+
+
+
+    const { bus,emit } = useEventsBus();
 
     watch(
       () => bus.value.get("selectedtopic"),
+
       (text) => {
+    
+        
         // destruct the parameters
-        state.text = text;
-        getTweet();
+        if (bus.value.get("ishot")[0]) {
+          state.Tweets_list=[];
+          state.Id = text;
+          getTweetbyId();
+        }
+        else {
+          state.Tweets_list=[];
+          state.text=text;
+          getTweetbyText();
+        }
       }
     );
 
-    const editTE = (item) => {
-      state.Tweet.url = item.url;
-      state.Tweet.title = item.title;
-      state.Tweet.author = item.author;
-      state.Tweet.comment = item.comment;
-      state.Tweet.attitude = item.attitude;
-      state.Tweet.topic = item.topic;
-    };
 
-    const saveTE = () => {
-      let newdata = {
-        title: state.Tweet.title,
-        author: state.Tweet.author,
-        comment: state.Tweet.comment,
-        attitude: state.Tweet.attitude,
-        topic: state.Tweet.topic,
-      };
-      if (state.Tweet.url == "") {
-        axios
-          .post(base_url, newdata)
-          .then(() => {
-            getTweet();
-          })
-          .catch((err) => {
-            console.log(err);
-          });
-      } else {
-        axios
-          .put(state.Tweet.url, newdata)
-          .then(() => {
-            getTweet();
-          })
-          .catch((err) => {
-            console.log(err);
-          });
-      }
-    };
-
-    const deleteTE = (item) => {
-      axios
-        .delete(item.url)
-        .then(() => {
-          getTweet();
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    };
 
     const Assign = () => {
-      getTweet();
+      emit('selectedtopic', state.SearchText)
+      emit('ishot', false)
     };
 
     const Clear = () => {
       state.text = "";
-      getTweet();
+      state.Id = "";
+      state.SearchText=""
     };
 
     onMounted(() => {
-      getTweet();
+
     });
 
     return {
       ...toRefs(state),
-      editTE,
-      saveTE,
-      deleteTE,
+
+      getTweetbyId,
+      getTweetbyText,
       Assign,
       Clear,
     };
@@ -133,37 +125,38 @@ export default {
 
   <div style="width: 52%">
     <form class="d-flex form-wrapper" role="search" @submit.prevent="submitFunc">
-      <keep-alive>
-        <input class="form-control me-2" id="search" type="text" placeholder="Search for your interested topics"
-          aria-label="Search" v-model="text" required />
-      </keep-alive>
+
+      <input class="form-control me-2" id="search" type="text" placeholder="Search for your interested topics"
+        aria-label="Search" v-model="SearchText" required />
+
       <input class="btn btn-outline-success" type="submit" @click="Assign()" value="Search" id="submit">
 
-      <!-- <button
-        class="btn btn-outline-info"
-        type="submit"
-        style="margin-left: 10px"
-        @click="Clear()"
-      >
-        Clear
-      </button> -->
+
     </form>
   </div>
   <!-- end search bar -->
 
   <div style="display: flex">
-    <div v-if="text === ''">
+    <div v-if="Id === ''&& text===''">
       <Topic />
     </div>
     <div class="row" v-else>
-      <div style="display: flex">
+      <div v-if="Tweets_list.length==0"><Loading/></div>
+      <div style="display: flex" v-else>
         <div class="row" style="min-width: 200%; max-width: 400px;">
           <div class="">
             <div class="card">
               <div class="card-header pb-0">
                 <div class="row">
                   <div class="col-lg-13 col-12">
-                    <h6>The tweets related to this topic</h6>
+                    <h6 style="display: flex; align-items: center;">
+                      <a style="cursor: pointer;" @click="Clear()"> <i class="fa fa-toggle-left" title="Back"
+                          style="margin-right:5px ;font-size:28px;color:red"></i></a>
+
+                      The tweets related to <span style="margin-left: 5px;">{{ Topic.name }}</span> <img
+                        icon="twitterlogo" src="./icons/twitterlogo.png" style="width: 5%;margin-left: 5px;" />
+                    </h6>
+
                     <p class="text-sm mb-0">
                       <i class="fa fa-check text-info" aria-hidden="true"></i>
                       <span class="font-weight-bold ms-1">See the details</span>
@@ -177,20 +170,23 @@ export default {
                   <table class="table align-items-center mb-0">
                     <thead>
                       <tr>
-                        <th>topic</th>
-                        <!-- <th>author</th> -->
-                        <th>content</th>
-                        <th>attitude</th>
+                        <th>Comment</th>
+                        <th>Like</th>
+                        <th>Attitude</th>
                       </tr>
                     </thead>
-                    <tbody>
-                      <tr v-for="item in Tweet_list" :key="item.url">
-                        <td>{{ item.title }}</td>
-                        <td>{{ item.author }}</td>
+                    <tbody >
+
+                        <tr v-for="item in Tweets_list">
                         <td>{{ item.comment }}</td>
+                        <td>{{ item.like }}</td>
                         <td>{{ item.attitude }}</td>
                       </tr>
+
                     </tbody>
+  
+                  
+                   
                   </table>
                 </div>
               </div>
@@ -203,7 +199,9 @@ export default {
             datasets: [
               {
                 label: 'My First Dataset',
-                data: [testNumber, 30, 20],
+                data: [Topic.negative / (Topic.negative + Topic.neutral + Topic.postive),
+                Topic.neutral / (Topic.negative + Topic.neutral + Topic.postive),
+                Topic.postive / (Topic.negative + Topic.neutral + Topic.postive)],
                 backgroundColor: [
                   'rgb(255, 99, 132)',
                   'rgb(54, 162, 235)',
@@ -216,21 +214,10 @@ export default {
         </div>
       </div>
     </div>
-    <!-- <div v-if="text === ''" style="position: fixed; right: 20px; left: 65%">
-      <Barchart :chart-data="{
-        labels: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
-        datasets: [{
-          label: 'Tweets Amount',
-          backgroundColor: '#f87979',
-          data: [testNumber, 20, 12, 20, 20, 20, 20, 20, 20, 20]
-        }]
-      }" />
-    </div> -->
+   
   </div>
 
 
-
-  <!-- </div> -->
 </template>
 
 

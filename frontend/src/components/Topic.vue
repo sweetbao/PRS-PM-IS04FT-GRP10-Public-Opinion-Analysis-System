@@ -24,7 +24,7 @@ export default {
   
 
   setup() {
-    let base_url = "http://127.0.0.1:8000/getTopic/";
+    let base_url = "http://127.0.0.1:8000/";
     const Topic_blank = { url: '', name: '', rank: 0 }
 
     const { emit } = useEventsBus()
@@ -38,7 +38,7 @@ export default {
 
 
     const getTopic = () => {
-      axios.get(base_url).then(res => {
+      axios.get(base_url+'getTopic/').then(res => {
         const name=[];
         const amount=[];
         state.Topic_list = res.data.topics;
@@ -50,10 +50,7 @@ export default {
         }); 
          state.name_list=name;
          state.amount_list=amount;
-          
 
-        console.log(state.amount_list);
-      console.log(state.name_list);
       }).catch(err => {
         console.log(err);
       })
@@ -61,7 +58,7 @@ export default {
 
     const selectT = (text) => {
       emit('selectedtopic', text)
-
+      emit('ishot', true)
     }
 
 
@@ -115,10 +112,14 @@ export default {
               <!-- <table class="table align-items-center mb-0"> -->
               <div>
                 <ol>
-                  <li v-for="item in Topic_list" :key="item.url" @click="selectT(item.name)"
-                    class="alert alert-primary alert-dismissible text-white">
-                       {{item.rank}}. {{ item.name }}
+                  
+                  <li v-for="item in Topic_list" :key="item.url" @click="selectT(item.id)"
+                    class="alert alert-primary alert-dismissible link-white" style="cursor:pointer ;">
+                   
+                       {{item.rank}}. {{ item.name }} 
+                     
                     </li>
+                
                 </ol>
               </div>
             </div>
