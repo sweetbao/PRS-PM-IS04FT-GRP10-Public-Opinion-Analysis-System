@@ -95,7 +95,7 @@ def getTopic(request):
     a = queryset[:10]
     topicList = []
     for t in a:
-        dic = {'rank':t.rank,'name':t.name,'positiveNumber':t.positiveNumber,'negativeNumber':t.negativeNumber,'neutralNumber':t.neutralNumber}
+        dic = {'id':t.pk, 'amount':t.volume, 'rank':t.rank,'name':t.name,'positiveNumber':t.positiveNumber,'negativeNumber':t.negativeNumber,'neutralNumber':t.neutralNumber}
         topicList.append(dic)
     result = sorted(topicList,key=lambda t:t['rank'])
 

@@ -24,7 +24,7 @@ export default {
   
 
   setup() {
-    let base_url = "http://127.0.0.1:8000/api/Topics/";
+    let base_url = "http://127.0.0.1:8000/getTopic/";
     const Topic_blank = { url: '', name: '', rank: 0 }
 
     const { emit } = useEventsBus()
@@ -32,15 +32,28 @@ export default {
     const state = reactive({
       Topic_list: [],
       Topic: Object.assign({}, Topic_blank),
-
+      name_list:[],
+      amount_list:[]
     });
 
 
     const getTopic = () => {
-      axios.get(base_url+'?isLatest=True').then(res => {
-        state.Topic_list = res.data;
+      axios.get(base_url).then(res => {
+        const name=[];
+        const amount=[];
+        state.Topic_list = res.data.topics;
+        state.name_list=state.Topic_list.name
         state.Topic = Object.assign({}, Topic_blank);
-        
+        state.Topic_list.forEach(element => {
+         name.push(element.name)
+         amount.push(element.amount)
+        }); 
+         state.name_list=name;
+         state.amount_list=amount;
+          
+
+        console.log(state.amount_list);
+      console.log(state.name_list);
       }).catch(err => {
         console.log(err);
       })
@@ -54,7 +67,7 @@ export default {
 
     onMounted(() => {
       getTopic();
-    console.log(state.Topic_list);
+    
     });
 
     return {
@@ -71,17 +84,17 @@ export default {
 <template>
    <div style="position: fixed; right: 20px; left: 65%">
       <BarChart :chart-data="{
-        labels: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
+        labels: name_list,
         datasets: [{
           label: 'Tweets Amount',
           backgroundColor: '#f87979',
-          data: [testNumber, 20, 12, 20, 20, 20, 20, 20, 20, 20]
+          data: amount_list
         }]
       }" />
     </div>
   <div class="row">
-    <div class="row mb-12" style="min-width: 200%;max-width: 400px;">
-      <div class="col-lg-11 col-md-12 ">
+    <div class="row mb-12" style="min-width: 250%;max-width: 265px;">
+      <div class="col-lg-12 ">
         <div class="card">
           <div class="card-header pb-0">
             <div class="row">
@@ -102,9 +115,9 @@ export default {
               <!-- <table class="table align-items-center mb-0"> -->
               <div>
                 <ol>
-                  <li v-for="item in Topic_list.slice().reverse()" :key="item.url" @click="selectT(item.name)"
+                  <li v-for="item in Topic_list" :key="item.url" @click="selectT(item.name)"
                     class="alert alert-primary alert-dismissible text-white">
-                    {{ item.name }}
+                       {{item.rank}}. {{ item.name }}
                     </li>
                 </ol>
               </div>

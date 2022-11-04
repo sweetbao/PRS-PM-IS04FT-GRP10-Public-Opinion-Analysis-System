@@ -23,25 +23,27 @@ export default {
 
   },
 
-  
+
 
   setup() {
     let base_url = "http://127.0.0.1:8000/api/Topics/";
-    const Topic_blank = { url: '', name: '', rank: 0 }
-
+    const Topic_blank = { url: '', name: '', rank: 0 };
+   
     const { emit } = useEventsBus()
 
     const state = reactive({
       Topic_list: [],
       Topic: Object.assign({}, Topic_blank),
-
+      currentFilterValue:'',
+      fliter_list:[]
     });
 
 
     const getTopic = () => {
       axios.get(base_url).then(res => {
         state.Topic_list = res.data;
-        state.Topic = Object.assign({}, Topic_blank)
+        state.Topic = Object.assign({}, Topic_blank);
+        reassign()
       }).catch(err => {
         console.log(err);
       })
@@ -52,15 +54,37 @@ export default {
 
     }
 
+    const filterdata=(data)=>{
+  
+      if(state.currentFilterValue != ''){
+      	return data.filter(function(d){
+         
+      		return d.name.toLowerCase().includes(state.currentFilterValue.slice().toLowerCase());
+       
+      	});          
+      }
+      else{
+       return data
+      }    	
+
+    }
+
+    const reassign=()=>{
+      state.fliter_list=filterdata( state.Topic_list)
+
+    }
 
     onMounted(() => {
       getTopic();
-
+  
     });
 
     return {
       ...toRefs(state),
-      selectT
+      selectT,
+      
+      filterdata,
+      reassign
     }
 
 
@@ -81,7 +105,8 @@ export default {
                
               </div>
               <div class="col-lg-12 col-12 my-auto text-end">
-
+                <input placeholder="filter value" v-model="currentFilterValue" />
+                <input type="submit" value="filter" @click="reassign()">
               </div>
             </div>
           </div>
@@ -90,9 +115,9 @@ export default {
               <!-- <table class="table align-items-center mb-0"> -->
               <div>
                 <ol>
-                  <li v-for="item in Topic_list.slice()" :key="item.url" @click="selectT(item.name)"
+                  <li v-for="item in fliter_list" :key="item.url" @click="selectT(item.name)"
                     class="alert alert-primary alert-dismissible text-white">
-                    {{ item.name }} -  <span>Record time: </span>{{dateTime( item.time)}} - <span>Amount: </span>{{item.volume}} - 
+                    {{item.rank}}. {{ item.name }} -  <span>Record time: </span>{{dateTime( item.time)}} - <span>Amount: </span>{{item.volume}} - 
                     <span>Positive: </span> {{100* Number(item.positiveNumber) /(Number(item.negativeNumber)+Number(item.positiveNumber)+Number(item.neutralNumber))}}% - 
                     <span>Negative: </span> {{100*Number(item.negativeNumber) /(Number(item.negativeNumber)+Number(item.positiveNumber)+Number(item.neutralNumber))}}%
                   </li>
