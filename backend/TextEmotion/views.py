@@ -51,7 +51,10 @@ def tweetsSearch(request, name):
         like.append(data[i][1])
     a = get_prediction(text)
     result = []
-    for i in range(0, 30, 1):
+    require = 30
+    if len(data)<30:
+        require = len(data)
+    for i in range(0, require, 1):
         dic = {'comment': text[i], 'attitude': a[i],'like':like[i]}
         result.append(dic)
     print(a)
@@ -149,24 +152,94 @@ def tweetsRunningJob():
             tweet = Tweet(topic = nameList[i],like = like[j],comment = text[j],attitude = result[j])
             tweet.save()
     return resultlist
-'''
-try:
-    tweetsRunningJob()
-except Exception as  e :
-    print(e)
+
 
 
 
 try:
-    scheduler = BackgroundScheduler()
-    scheduler.add_jobstore(DjangoJobStore(), "default", replace_existing=True)
-
     django_job_store = DjangoJobStore()
     print(django_job_store.get_all_jobs())
+    scheduler = BackgroundScheduler()
+    scheduler.add_jobstore(DjangoJobStore(), "default", replace_existing=True)
+   # django_job_store = DjangoJobStore()
+  #  print(django_job_store.get_all_jobs())
+   # django_job_store.remove_all_jobs()
+
+
+    @register_job(scheduler, 'cron', id='sixjob', hour=6, minute=0)
+    def sixAm():
+
+        print('job1')
+        tweetsRunningJob()
+
+
+    @register_job(scheduler, 'cron', id='eightjob', hour=8, minute=0)
+    def eightAm():
+
+        print('job2')
+        tweetsRunningJob()
+
+
+    @register_job(scheduler, 'cron', id='test3', hour=10, minute=0)
+    def tenAm():
+
+        print('job3')
+        tweetsRunningJob()
+
+
+    @register_job(scheduler, 'cron', id='test4', hour=12, minute=0)
+    def tweAm():
+
+        print('job4')
+        tweetsRunningJob()
+
+
+    @register_job(scheduler, 'cron', id='test5', hour=14, minute=0)
+    def twopm():
+
+        print('job5')
+
+        tweetsRunningJob()
+
+
+    @register_job(scheduler, 'cron', id='test6', hour=16, minute=0)
+    def fourpm():
+
+        print('job6')
+        tweetsRunningJob()
+
+
+    @register_job(scheduler, 'cron', id='test7', hour=18, minute=0)
+    def sixpm():
+
+        print('job7')
+        tweetsRunningJob()
+
+
+    @register_job(scheduler, 'cron', id='test8', hour=20, minute=0)
+    def eightpm():
+
+        print('job8')
+        tweetsRunningJob()
+
+
+    @register_job(scheduler, 'cron', id='test9', hour=22, minute=0)
+    def tenpm():
+
+        print('job9')
+        tweetsRunningJob()
+
+
+
+   # django_job_store.remove_all_jobs()
+
+
+
+
 
     #    register_events(scheduler)
     # 启动定时器
     scheduler.start()
 
 except Exception as e:
-    print('定时任务异常：%s' % str(e))'''
+    print('定时任务异常：%s' % str(e))
