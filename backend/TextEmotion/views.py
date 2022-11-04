@@ -75,17 +75,19 @@ def getText(request, id):
     topic = Topic.objects.get(id = id)
     tweets = Tweet.objects.filter(topic = topic.name)
     rank = topic.rank
+    print(rank)
+    print(type(rank))
     name = topic.name
     positiveNumber = topic.positiveNumber
     negativeNumber = topic.negativeNumber
     neutralNumber = topic.neutralNumber
     tweetsList = []
     for i in tweets:
-        data = {'like': i.like, 'comment': i.comment, 'attitude': i.attitude}
-        tweetsList.append(data)
-    data = {'rank':rank,'name':name,'positiveNumber':positiveNumber,'negativeNumber':negativeNumber,'neutralNumber':neutralNumber}
-    data = sorted(data,key=lambda t:t['rank'])
-    jsonfile = {'tweets':tweetsList,'topic':data}
+        textdata = {'like': i.like, 'comment': i.comment, 'attitude': i.attitude}
+        tweetsList.append(textdata)
+    topicdata = {'rank':rank,'name':name,'positiveNumber':positiveNumber,'negativeNumber':negativeNumber,'neutralNumber':neutralNumber}
+    data = sorted(tweetsList,key=lambda t:t['like'])
+    jsonfile = {'tweets':tweetsList,'topic':topicdata}
     json_str = json.dumps(jsonfile)
     return HttpResponse(json_str, content_type="application/json")
 
@@ -95,6 +97,8 @@ def getTopic(request):
     a = queryset[:10]
     topicList = []
     for t in a:
+        print(type(t.rank))
+        print(t.rank)
         dic = {'id':t.pk, 'amount':t.volume, 'rank':t.rank,'name':t.name,'positiveNumber':t.positiveNumber,'negativeNumber':t.negativeNumber,'neutralNumber':t.neutralNumber}
         topicList.append(dic)
     result = sorted(topicList,key=lambda t:t['rank'])
