@@ -25,9 +25,13 @@ Public opinion analysis system based on text emotion recognition
 
 1. Create a folder in computer to storage the project file and open a terminal in this folder:
  >git clone https://github.com/sweetbao/PRS-Public-Opinion-Anakysis.git
+ 
  >cd PRS-Public-Opinion-Anakysi
+ 
  >python -m venv venv
+ 
  >venv\Scripts\activate(windows) OR: source venv/bin/activate(mac)
+ 
  >pip install -r requirements.txt
  
 2. Download pretrained bert model file(pytorch_model.bin) to `./TextEmotion/SentimentModel/bert-base-uncased`
@@ -40,12 +44,16 @@ Public opinion analysis system based on text emotion recognition
 
 1. In project folder terminal(with vertual environment activated) : 
  >cd backend
+ 
  >python manage.py runserver (ignore the migrate error)
  
 2. Open an other terminal in project folder:
  >cd frontend
+ 
  >npm install (optional:npm audit fix)
+ 
  >npm fund 
+ 
  >npm run dev
 
 ### [ 4 ] Run the systems on browser
