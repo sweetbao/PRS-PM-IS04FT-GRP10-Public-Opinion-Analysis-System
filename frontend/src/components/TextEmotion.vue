@@ -143,7 +143,7 @@ export default {
     <div class="row" v-else>
       <div v-if="Tweets_list.length==0"><Loading/></div>
       <div style="display: flex" v-else>
-        <div class="row" style="min-width: 200%; max-width: 400px;">
+        <div class="row" style="min-width: 200%; max-width: 350px;">
           <div class="">
             <div class="card">
               <div class="card-header pb-0">
@@ -171,7 +171,7 @@ export default {
                     <thead>
                       <tr>
                         <th>Comment</th>
-                        <th>Like</th>
+                     
                         <th>Attitude</th>
                       </tr>
                     </thead>
@@ -179,7 +179,7 @@ export default {
 
                         <tr v-for="item in Tweets_list">
                         <td>{{ item.comment }}</td>
-                        <td>{{ item.like }}</td>
+                       
                         <td>{{ item.attitude }}</td>
                       </tr>
 
@@ -199,9 +199,9 @@ export default {
             datasets: [
               {
                 label: 'My First Dataset',
-                data: [Topic.negative / (Topic.negative + Topic.neutral + Topic.postive),
-                Topic.neutral / (Topic.negative + Topic.neutral + Topic.postive),
-                Topic.postive / (Topic.negative + Topic.neutral + Topic.postive)],
+                data: [(Topic.negative / (Topic.negative + Topic.neutral + Topic.postive)).toFixed(3),
+                (Topic.neutral / (Topic.negative + Topic.neutral + Topic.postive)).toFixed(3),
+                (Topic.postive / (Topic.negative + Topic.neutral + Topic.postive)).toFixed(3)],
                 backgroundColor: [
                   'rgb(255, 99, 132)',
                   'rgb(54, 162, 235)',

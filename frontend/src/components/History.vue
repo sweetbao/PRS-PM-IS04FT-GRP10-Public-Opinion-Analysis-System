@@ -113,8 +113,8 @@ export default {
                     class="alert alert-primary alert-dismissible text-white">
                     <div style="color: gold;">
                     {{item.rank}}. {{ item.name }} -  <span>Record time: </span>{{dateTime( item.time)}} - <span>Amount: </span>{{item.volume}} - 
-                    <span>Positive: </span> {{100* Number(item.positiveNumber) /(Number(item.negativeNumber)+Number(item.positiveNumber)+Number(item.neutralNumber))}}% - 
-                    <span>Negative: </span> {{100*Number(item.negativeNumber) /(Number(item.negativeNumber)+Number(item.positiveNumber)+Number(item.neutralNumber))}}%
+                    <span>Positive: </span> {{(100* Number(item.positiveNumber) /(Number(item.negativeNumber)+Number(item.positiveNumber)+Number(item.neutralNumber))).toFixed(2)}}% - 
+                    <span>Negative: </span> {{(100*Number(item.negativeNumber) /(Number(item.negativeNumber)+Number(item.positiveNumber)+Number(item.neutralNumber))).toFixed(2)}}%
                   </div>
                   </li>
                 </ol>
