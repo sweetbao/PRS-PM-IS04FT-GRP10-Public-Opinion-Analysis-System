@@ -33,7 +33,8 @@ export default {
       Topic_list: [],
       Topic: Object.assign({}, Topic_blank),
       name_list:[],
-      amount_list:[]
+      amount_list:[],
+      timestamp:""
     });
 
 
@@ -47,7 +48,9 @@ export default {
         state.Topic_list.forEach(element => {
          name.push(element.name)
          amount.push(element.amount)
+
         }); 
+        state.timestamp=state.Topic_list[0].timestamp;
          state.name_list=name;
          state.amount_list=amount;
 
@@ -97,10 +100,12 @@ export default {
             <div class="row">
               <div class="col-lg-50 col-50">
                 <h6>Top 10 topics in twitter</h6>
-                <p class="text-sm mb-0">
+                <p class="text-sm mb-0" style="display:flex ;">
                   <i class="fa fa-check text-info" aria-hidden="true"></i>
                   <span class="font-weight-bold ms-1">most popular topics</span>
+                  <span style="margin-left: auto;">Retrieved at: {{timestamp}}</span>
                 </p>
+                
               </div>
               <div class="col-lg-12 col-12 my-auto text-end">
 

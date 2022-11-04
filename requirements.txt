@@ -2,6 +2,7 @@ APScheduler==3.9.1
 beautifulsoup4==4.11.1
 Django==4.1.2
 django_apscheduler==0.6.2
+django-cors-headers==3.13.0
 djangorestframework==3.14.0
 emoji==2.2.0
 gensim==4.1.2

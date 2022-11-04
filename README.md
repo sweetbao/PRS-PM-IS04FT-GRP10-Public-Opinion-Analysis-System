@@ -34,9 +34,9 @@ Public opinion analysis system based on text emotion recognition
  
  >pip install -r requirements.txt
  
-2. Download pretrained bert model file(pytorch_model.bin) to `./TextEmotion/SentimentModel/bert-base-uncased`
+2. Download pretrained bert model file(pytorch_model.bin) to `../backend/TextEmotion/SentimentModel/bert-base-uncased`
     https://drive.google.com/drive/folders/18UwFy_7vD2ssGo76FRMO0r0tYSjfHmFs?usp=sharing
-3. Download our model files to `./TextEmotion/SentimentModel/checkpoints`(please create this folder if not exist)
+3. Download our model files to `../backend/TextEmotion/SentimentModel/checkpoints`(please create checkpoints folder first)
     https://drive.google.com/drive/folders/1td7h1gs2Uu6ia9MO6jvBOL-HRht-0EnK?usp=sharing
 
 

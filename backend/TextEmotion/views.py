@@ -1,5 +1,6 @@
 import json
 
+from datetime import datetime
 from django.core import serializers
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -99,7 +100,7 @@ def getTopic(request):
     for t in a:
         print(type(t.rank))
         print(t.rank)
-        dic = {'id':t.pk, 'amount':t.volume, 'rank':t.rank,'name':t.name,'positiveNumber':t.positiveNumber,'negativeNumber':t.negativeNumber,'neutralNumber':t.neutralNumber}
+        dic = {'id':t.pk,'timestamp':t.time.strftime("%d-%b-%Y (%H:%M)") , 'amount':t.volume, 'rank':t.rank,'name':t.name,'positiveNumber':t.positiveNumber,'negativeNumber':t.negativeNumber,'neutralNumber':t.neutralNumber}
         topicList.append(dic)
     result = sorted(topicList,key=lambda t:t['rank'])
 
