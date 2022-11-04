@@ -26,7 +26,7 @@ Public opinion analysis system based on text emotion recognition
 1. Create a folder in computer to storage the project file and open a terminal in this folder:
  >git clone https://github.com/sweetbao/PRS-PM-IS04FT-GRP10-Public-Opinion-Analysis-System.git
  
- >cd PRS-Public-Opinion-Anakysi
+ >cd PRS-PM-IS04FT-GRP10-Public-Opinion-Analysis-System
  
  >python -m venv venv
  
