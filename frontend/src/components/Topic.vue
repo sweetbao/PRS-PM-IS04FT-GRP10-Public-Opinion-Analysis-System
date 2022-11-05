@@ -53,7 +53,6 @@ export default {
         state.timestamp=state.Topic_list[0].timestamp;
          state.name_list=name;
          state.amount_list=amount;
-
       }).catch(err => {
         console.log(err);
       })

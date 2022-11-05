@@ -60,7 +60,7 @@ export default {
           state.Topic.postive = Number(res.data.prediction.positive);
           state.Topic.negative = Number(res.data.prediction.negative);
           state.Topic.neutral = Number(res.data.prediction.neutral);
-          console.log(state.Tweets_list)
+   
         })
         .catch((err) => {
           console.log(err);
@@ -128,7 +128,7 @@ export default {
 
       <input class="form-control me-2" id="search" type="text" placeholder="Search for your interested topics"
         aria-label="Search" v-model="SearchText" required />
-
+      <small style="color:rebeccapurple;font-size: xx-small;" v-if="SearchText!=''">Hint: Long waits will result from unpopular topics.</small>
       <input class="btn btn-outline-success" type="submit" @click="Assign()" value="Search" id="submit">
 
 
