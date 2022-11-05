@@ -170,7 +170,7 @@ export default {
                   <table class="table align-items-center mb-0">
                     <thead>
                       <tr>
-                        <th>Comment</th>
+                        <th>Tweets</th>
                      
                         <th>Attitude</th>
                       </tr>
