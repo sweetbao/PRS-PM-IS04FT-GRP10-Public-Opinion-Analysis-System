@@ -11,12 +11,10 @@ from tensorboardX import SummaryWriter
 from glob import glob
 
 from dataset import MyDataset
-from model import RNN, LSTM, CNN, LSTM_with_Attention, Bertmodel, Bertcnnmodel
+from model import RNN, LSTM, CNN, LSTM_with_Attention, Bertmodel, Bertcnnmodel,BertMultiTaskmodel
 import os
 from tqdm import tqdm
 from dataloader import BertDataLoader
-
-
 
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
@@ -63,7 +61,7 @@ def parse_args():
                         help="Embedding dimensions")
     parser.add_argument('--word_vector', type=str2bool, nargs='?',
                         default=True, help="Use word vector like gloVe")
-    parser.add_argument('--model', type=str, choices=['rnn', 'lstm', 'cnn', 'lstm_attn', 'bert', 'bert_cnn'],
+    parser.add_argument('--model', type=str, choices=['rnn', 'lstm', 'cnn', 'lstm_attn', 'bert', 'bert_cnn', 'bert_multitask'],
                         required=True,
                         help="Choose model")
 
@@ -89,7 +87,7 @@ def parse_args():
                                    default=True, help="use bidirectional")
         target_parser.add_argument('--dropout', type=str2bool, nargs='?',
                                    default=True, help="Use dropout")
-    elif parser_args.model in ['bert', 'bert_cnn']:
+    elif parser_args.model in ['bert', 'bert_cnn', 'bert_multitask']:
         target_parser.add_argument('--max_seq_length', type=int, default=50,
                                    help="bert max sequence length")
         target_parser.add_argument('--path', type=str, default=os.getcwd(),
@@ -156,6 +154,11 @@ def main(args):
         model = Bertcnnmodel(
             args
         ).to(device)
+    elif args.model == 'bert_multitask':
+        print("Model: Bert with MultiTask")
+        model = BertMultiTaskmodel(
+            args
+        ).to(device)
 
     if args.word_vector:
         model.embedding.weight.data.copy_(dataset.TEXT.vocab.vectors)
@@ -172,7 +175,7 @@ def main(args):
     best_acc = 0
 
     for epoch in range(args.epoch):
-        if args.model == 'bert' or args.model == 'bert_cnn':
+        if args.model == 'bert' or args.model == 'bert_cnn' or args.model == 'bert_multitask':
             data = BertDataLoader()
             # data = pickle.load(open( "twitter_data/bert_features/train.pkl", 'rb'))
             train_loss, train_acc = train(model, data['train'],
@@ -213,7 +216,7 @@ def main(args):
             filename = "checkpoints/{}_{}_bs{}_hd{}_acc{:.03f}.pth".format(
                 args.model, args.optim, args.batch_size, args.hd, test_acc
             )
-        elif args.model in ['bert', 'bert_cnn']:
+        elif args.model in ['bert', 'bert_cnn', 'bert_multitask']:
             filename = "checkpoints/{}_{}_bs{}_acc{:.03f}.pth".format(
                 args.model, args.optim, args.batch_size, test_acc
                 )
@@ -229,7 +232,27 @@ def train(model, iterator, optimizer, criterion):
 
     model.train()
     device = torch.device('cuda' if torch.cuda.is_available() and args.cuda else 'cpu')
-    if type(model) == Bertmodel or type(model) == Bertcnnmodel:
+    if type(model) == BertMultiTaskmodel:
+        with tqdm(total=len(iterator)) as progress_bar:
+            for batch in iterator:
+                feature = batch['features'].to(device)
+                labels = batch['labels'].to(device)
+                domains = batch['domains'].to(device)
+                dom_lab = batch['dom_lab'].to(device)
+                optimizer.zero_grad()
+                preds, preds_dom = model(feature, domains, dom_lab)
+                loss = criterion(preds, labels.long())
+                loss = loss + criterion(preds_dom, dom_lab.long())
+                acc = binary_accuracy(preds, labels)
+                loss.backward()
+                optimizer.step()
+
+                epoch_loss += loss.item()
+                epoch_acc += acc.item()
+                progress_bar.update(1)
+                progress_bar.set_postfix({"train loss": loss.item(), "train acc": acc.item()})
+
+    elif type(model) == Bertmodel or type(model) == Bertcnnmodel:
         with tqdm(total=len(iterator)) as progress_bar:
             for batch in iterator:
                 # optimizer.zero_grad()
@@ -281,31 +304,50 @@ def evaluate(model, iterator, criterion):
 
     model.eval()
     device = torch.device('cuda' if torch.cuda.is_available() and args.cuda else 'cpu')
-    if type(model) == Bertmodel or type(model) == Bertcnnmodel:
+    if type(model) == BertMultiTaskmodel:
         with tqdm(total=len(iterator)) as progress_bar:
-            for batch in iterator:
-                feature = batch['features'].to(device)
-                labels = batch['labels'].to(device)
-                preds = model(feature)
-                loss = criterion(preds, labels.long())
-                acc = binary_accuracy(preds, labels)
+            with torch.no_grad():
+                for batch in iterator:
+                    feature = batch['features'].to(device)
+                    labels = batch['labels'].to(device)
+                    domains = batch['domains'].to(device)
+                    dom_lab = batch['dom_lab'].to(device)
+                    preds, preds_dom = model(feature, domains, dom_lab)
+                    loss = criterion(preds, labels.long())
+                    loss += criterion(preds_dom, dom_lab.long())
+                    acc = binary_accuracy(preds, labels)
 
-                epoch_loss += loss.item()
-                epoch_acc += acc.item()
-                progress_bar.set_postfix({"eval loss": loss.item(), "eval acc": acc.item()})
-                progress_bar.update(1)
+                    epoch_loss += loss.item()
+                    epoch_acc += acc.item()
+                    progress_bar.set_postfix({"eval loss": loss.item(), "eval acc": acc.item()})
+                    progress_bar.update(1)
+    elif type(model) == Bertmodel or type(model) == Bertcnnmodel:
+        with tqdm(total=len(iterator)) as progress_bar:
+            with torch.no_grad():
+                for batch in iterator:
+                    feature = batch['features'].to(device)
+                    labels = batch['labels'].to(device)
+                    preds = model(feature)
+                    loss = criterion(preds, labels.long())
+                    acc = binary_accuracy(preds, labels)
+
+                    epoch_loss += loss.item()
+                    epoch_acc += acc.item()
+                    progress_bar.set_postfix({"eval loss": loss.item(), "eval acc": acc.item()})
+                    progress_bar.update(1)
     else:
         with tqdm(total=len(iterator)) as progress_bar:
-            for batch in iterator:
-                batch.text = batch.text.permute(1, 0)
-                pred = model(batch.text).squeeze(1)
-                loss = criterion(pred, batch.label.long())
-                acc = binary_accuracy(pred, batch.label)
+            with torch.no_grad():
+                for batch in iterator:
+                    batch.text = batch.text.permute(1, 0)
+                    pred = model(batch.text).squeeze(1)
+                    loss = criterion(pred, batch.label.long())
+                    acc = binary_accuracy(pred, batch.label)
 
-                epoch_loss += loss.item()
-                epoch_acc += acc.item()
-                progress_bar.set_postfix({"eval loss": loss.item(), "eval acc": acc.item()})
-                progress_bar.update(1)
+                    epoch_loss += loss.item()
+                    epoch_acc += acc.item()
+                    progress_bar.set_postfix({"eval loss": loss.item(), "eval acc": acc.item()})
+                    progress_bar.update(1)
 
     return epoch_loss / len(iterator), epoch_acc / len(iterator)
 
