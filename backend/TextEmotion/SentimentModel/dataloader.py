@@ -24,12 +24,22 @@ class Loader(Dataset):
         # ids = self.df[item]['id']
         res = torch.Tensor(self.df[item]['text'])
         label = int(self.df[item]['harm'])
-        sample = {
-            'features': res,
-            'labels': label,
-            # 'id': ids,
-            # 'user': user
-        }
+        if 'dom' in self.df[item].keys():
+            dom = torch.Tensor(self.df[item]['dom'])
+            dom_lab = int(self.df[item]['dom_lab'])
+            sample = {
+                'features': res,
+                'labels': label,
+                'domains': dom,
+                'dom_lab': dom_lab,
+                # 'id': ids,
+                # 'user': user
+            }
+        else:
+            sample = {
+                'features': res,
+                'labels': label,
+            }
         return sample
 
 
@@ -37,7 +47,7 @@ def BertDataLoader( index=None, mask=None, sequence_len=100, features_dim=100, b
                    shuffle=False, debug_mode=False, size='normal'):
     # data_path = args.data_path
     set_name = ["train", "dev", "test"]
-    train_df, valid_df, test_df = [None, None, None]
+    train_df, valid_df, test_df, dom_df = [None, None, None, None]
     for name in set_name:
         data_path = 'twitter_data/bert_features/'+name+'.pkl'
         # data_path = 'twitter_data/bert_features/' + 'test' + '.pkl'

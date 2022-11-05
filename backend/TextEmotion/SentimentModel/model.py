@@ -3,6 +3,10 @@ import torch.nn as nn
 import torch.nn.functional as F
 from pytorch_transformers import BertForSequenceClassification, XLNetForSequenceClassification, RobertaForSequenceClassification, BertModel
 import platform
+from .MultiHeadSelfAttention import MultiHeadAttention
+
+from torch.autograd import Function
+
 
 torch.manual_seed(1234)
 torch.cuda.manual_seed(1234)
@@ -183,3 +187,100 @@ class Bertcnnmodel(nn.Module):
         # output = self.dropout(output)
         return x
 
+
+class BertMultiTaskmodel(nn.Module):
+    def __init__(self, args, in_dim=768, hidden_size=100, num_classes=3, dom_classes=32, num_heads=2):
+        super(BertMultiTaskmodel, self).__init__()
+        if platform.system() == 'Linux' or 'Darwin':
+            self.bert = BertModel.from_pretrained(args.path + '/bert-base-uncased', output_hidden_states=True)
+        else:
+            self.bert = BertModel.from_pretrained(args.path + '\\bert-base-uncased', output_hidden_states=True)
+        self.conv = nn.Conv2d(1, 1, kernel_size=(3, in_dim), stride=1, padding=0)  # for sentence
+        self.conv2 = nn.Conv2d(1, 1, kernel_size=(3, in_dim), stride=1, padding=0)  # for domain
+        self.pool = nn.MaxPool1d(kernel_size=4, stride=1)  # for sentence
+        self.pool2 = nn.MaxPool1d(kernel_size=4, stride=1)  # for domain
+        self.attn = MultiHeadAttention(10, num_heads)  # for sentence
+        self.attn2 = MultiHeadAttention(10, num_heads)  # for domain
+        self.linear1 = nn.Linear(23, 10)
+        self.linear2 = nn.Linear(10, num_classes)  # Sentiment classifier
+        self.linear3 = nn.Linear(46, 10)
+        self.linear4 = nn.Linear(10, dom_classes)  # Domain classifier
+        # self.rnn = nn.LSTM(in_dim, hidden_size, num_layers=3,
+        #                    bidirectional=True,
+        #                    dropout=0.5)
+        # self.fc = nn.Linear(hidden_size * 2, dom_classes)
+        self.Grl = GRL()
+
+
+    def forward(self, text, domains, dom_lab):
+        input_mask = text[:, 1, :].long()
+        segment_ids = text[:, 2, :].long()
+        input_ids = text[:, 0, :].long()
+        output = self.bert(input_ids=input_ids, attention_mask=input_mask, token_type_ids=segment_ids)
+
+        input_mask_dom = domains[:, 1, :].long()
+        segment_ids_dom = domains[:, 2, :].long()
+        input_ids_dom = domains[:, 0, :].long()
+        output_dom = self.bert(input_ids=input_ids_dom, attention_mask=input_mask_dom, token_type_ids=segment_ids_dom)
+
+        record = []
+        for i in range(len(output[2])):
+            max_val = self.conv(output[2][i].unsqueeze(1)).squeeze(1).max(dim=1)[0]
+            record.append(max_val)
+
+        x = torch.cat(tuple(record), dim=1)
+
+
+
+        record_dom = []
+        for i in range(len(output_dom[2])):
+            max_val_dom = self.conv(output_dom[2][i].unsqueeze(1)).squeeze(1).max(dim=1)[0]
+            record_dom.append(max_val_dom)
+
+        x_dom = torch.cat(tuple(record_dom), dim=1)
+        # 8*13
+        x_pool = self.pool(x.unsqueeze(0)).squeeze()
+        x_pool_dom = self.pool2(x_dom.unsqueeze(0)).squeeze()
+        # 8*10
+        # x = self.attn(torch.cat([x, x_pool], 1))
+        # x_dom = self.attn2(torch.cat([x_dom, x_pool_dom], 1))
+        x = torch.cat([x, x_pool_dom], 1)
+        x_dom = torch.cat([x_dom, x_pool], 1)
+
+        l_dom = self.linear1(x).relu()
+        l_dom = self.Grl(l_dom)
+        l_dom = self.linear4(l_dom)
+        # output = self.dropout(output)
+
+        l = self.linear3(torch.cat([x, x_dom], 1)).relu()
+        l = self.linear2(l)
+
+        return l, l_dom
+
+
+class grl_func(torch.autograd.Function):
+    def __init__(self):
+        super(grl_func, self).__init__()
+
+    @ staticmethod
+    def forward(ctx, x, lambda_):
+        ctx.save_for_backward(lambda_)
+        return x.view_as(x)
+
+    @ staticmethod
+    def backward(ctx, grad_output):
+        lambda_, = ctx.saved_variables
+        grad_input = grad_output.clone()
+        return - lambda_ * grad_input, None
+
+
+class GRL(nn.Module):
+    def __init__(self, lambda_=0.):
+        super(GRL, self).__init__()
+        self.lambda_ = torch.tensor(lambda_)
+
+    def set_lambda(self, lambda_):
+        self.lambda_ = torch.tensor(lambda_)
+
+    def forward(self, x):
+        return grl_func.apply(x, self.lambda_)

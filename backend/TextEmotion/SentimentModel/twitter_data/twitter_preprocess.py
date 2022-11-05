@@ -36,14 +36,16 @@ tweets = pd.read_csv('twitter_training.csv', header=None)
 tweets_val = pd.read_csv('twitter_validation.csv', header=None)
 tweets = tweets.sample(frac=1).reset_index(drop=True)
 tweets = tweets[tweets[2] != "Irrelevant"]
-tweets = tweets[[2, 3]]
-tweets.rename(columns={2: "Sentiment", 3: 'text'}, inplace=True)
+tweets = tweets[[1, 2, 3]]
+tweets.rename(columns={1: "Domain", 2: "Sentiment", 3: 'text'}, inplace=True)
 # print(tweets.head())
 sentences = tweets['text'].values
 labels = tweets['Sentiment'].values
+domain = tweets['Domain'].values
 stopwords = [set(stopwords.words('english'))]
 cleaned_sentences = []
 final_labels = []
+final_domains = []
 for i in range(len(sentences)):
     try:
         sent = re.sub('[^A-Za-z]', ' ', sentences[i])
@@ -52,9 +54,20 @@ for i in range(len(sentences)):
         ps = nltk.pos_tag(sent)
         sent = [i[0] for i in ps if i[1] == ('JJ' or 'VBP' or 'VB')]
         sent = ' '.join(sent)
+        dom = domain[i]
+        # if domain[i] == 'CS-GO' or domain[i] == 'FIFA' or domain[i] == 'NBA2K':
+        #     dom = domain[i]
+        # else:
+        #     # 去掉domain括号里的单词，用大写字母分词
+        #     dom = re.sub(u"\\(.*?\\)|\\{.*?}|\\[.*?]", "", domain[i])
+        #     dom = re.sub("[A-Z]", lambda x: " " + x.group(0), dom)
+        #     # pattern = r',|\.|/|;|\'|`|\[|\]|<|>|\?|:|"|\{|\}|\~|!|@|#|\$|%|\^|&|\(|\)|-|=|\_|\+|，|。|、|；|‘|’|【|】|·|！| |…|（|）'
+        #     # dom = re.sub(pattern, lambda x: " " + x.group(0), dom)
+        #     dom = dom.lower()
         if sent != '':
             cleaned_sentences.append(sentences[i])
             final_labels.append(labels[i])
+            final_domains.append(dom)
         if i % 10000 == 0:
             print('nltk Count:', i)
     except:
@@ -68,6 +81,9 @@ with open('./train.sen', 'w') as f1:
             with open('./dev.lab', 'w') as f4:
                 with open('./test.sen', 'w') as f5:
                     with open('./test.lab', 'w') as f6:
+                        with open('./train.dom', 'w') as f7:
+                            with open('./dev.dom', 'w') as f8:
+                                with open('./test.dom', 'w') as f9:
                         # for i in range(data_len):
                         #     if i < 0.6 * data_len:
                         #         f1.write(cleaned_sentences[i]+'\n')
@@ -78,12 +94,15 @@ with open('./train.sen', 'w') as f1:
                         #     else:
                         #         f5.write(cleaned_sentences[i] + '\n')
                         #         f6.write(final_labels[i] + '\n')
-                        for i in range(data_len):
-                            if i < 0.8 * data_len:
-                                f1.write(cleaned_sentences[i]+'\n')
-                                f2.write(final_labels[i]+'\n')
-                            else:
-                                f3.write(cleaned_sentences[i] + '\n')
-                                f4.write(final_labels[i] + '\n')
-                                f5.write(cleaned_sentences[i] + '\n')
-                                f6.write(final_labels[i] + '\n')
+                                    for i in range(data_len):
+                                        if i < 0.8 * data_len:
+                                            f1.write(cleaned_sentences[i]+'\n')
+                                            f2.write(final_labels[i]+'\n')
+                                            f7.write(final_domains[i] + '\n')
+                                        else:
+                                            f3.write(cleaned_sentences[i] + '\n')
+                                            f4.write(final_labels[i] + '\n')
+                                            f5.write(cleaned_sentences[i] + '\n')
+                                            f6.write(final_labels[i] + '\n')
+                                            f8.write(final_domains[i] + '\n')
+                                            f9.write(final_domains[i] + '\n')
