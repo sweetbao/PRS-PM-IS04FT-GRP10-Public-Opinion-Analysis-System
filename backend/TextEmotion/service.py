@@ -187,9 +187,9 @@ def get_stream(set, number, account):
                 except:
                     continue
             texts = client.translate(tweetsText, target='en', fmt='text')
-            if not texts is None:
+            try:
                 texts = texts.translatedText
-            else:
+            except:
                 continue
             print(tweetsText)
             print('here is trans')
