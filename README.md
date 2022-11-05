@@ -8,7 +8,7 @@ Public opinion analysis system based on text emotion recognition
 
 
 
-## SECTION 5 : Installation and User Guide
+##  Installation and User Guide
 
 ### [ 1 ] System Environment Requirement
 
