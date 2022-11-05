@@ -15,7 +15,15 @@ export default {
     
    
     dateTime(value) {
-      return moment(value).format("DD/MM/YYYY hh:mm:ss");
+      
+      
+      
+      var UTC=new Date(moment(value));
+      let diff = UTC.getTimezoneOffset();
+   
+      var local=new Date(UTC.setMinutes(UTC.getMinutes() + diff));
+
+      return  local.toLocaleDateString() +' '+local.toLocaleTimeString()
     },
 
   },
@@ -40,6 +48,7 @@ export default {
       axios.get(base_url).then(res => {
         state.Topic_list = res.data;
         state.Topic = Object.assign({}, Topic_blank);
+     
         reassign()
       }).catch(err => {
         console.log(err);
