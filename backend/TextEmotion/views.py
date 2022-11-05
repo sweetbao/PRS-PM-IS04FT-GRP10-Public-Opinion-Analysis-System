@@ -103,7 +103,7 @@ def getTopic(request):
     for t in a:
         print(type(t.rank))
         print(t.rank)
-        dic = {'id':t.pk,'timestamp':t.time.strftime("%d-%b-%Y (%H:%M)") , 'amount':t.volume, 'rank':t.rank,'name':t.name,'positiveNumber':t.positiveNumber,'negativeNumber':t.negativeNumber,'neutralNumber':t.neutralNumber}
+        dic = {'id':t.pk,'timestamp':t.time.strftime("%m/%d/%Y, %H:%M:%S%z") , 'amount':t.volume, 'rank':t.rank,'name':t.name,'positiveNumber':t.positiveNumber,'negativeNumber':t.negativeNumber,'neutralNumber':t.neutralNumber}
         topicList.append(dic)
     result = sorted(topicList,key=lambda t:t['rank'])
 
@@ -229,7 +229,11 @@ try:
         print('job9')
         tweetsRunningJob()
 
+    @register_job(scheduler, 'cron', id='test10', hour=2, minute=0)
+    def tenpm():
 
+        print('job10')
+        tweetsRunningJob()
 
    # django_job_store.remove_all_jobs()
 

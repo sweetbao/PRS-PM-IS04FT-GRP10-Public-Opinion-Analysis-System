@@ -4,6 +4,7 @@ import { reactive, onMounted, toRefs } from 'vue'
 import useEventsBus from './eventbus'
 import router from '../router'
 import BarChart from '../components/Barchart.vue'
+import moment from 'moment';
 
 
 
@@ -17,7 +18,12 @@ export default {
     selectTopic(topicname) {
       EventBus.assign(topicname);
       router.push({ name: 'Paper' });
-    }
+    },
+    dateTime(value) {
+      var UTC=new Date(moment(value));
+      return  UTC.toLocaleDateString() +' '+UTC.toLocaleTimeString()
+    },
+
 
   },
 
@@ -51,6 +57,7 @@ export default {
 
         }); 
         state.timestamp=state.Topic_list[0].timestamp;
+        console.log(state.timestamp)
          state.name_list=name;
          state.amount_list=amount;
       }).catch(err => {
@@ -102,7 +109,7 @@ export default {
                 <p class="text-sm mb-0" style="display:flex ;">
                   <i class="fa fa-check text-info" aria-hidden="true"></i>
                   <span class="font-weight-bold ms-1">most popular topics</span>
-                  <span style="margin-left: auto;">Retrieved at: {{timestamp}}</span>
+                  <span style="margin-left: auto;">Retrieved at: {{dateTime(timestamp)}}</span>
                 </p>
                 
               </div>

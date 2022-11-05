@@ -19,11 +19,8 @@ export default {
       
       
       var UTC=new Date(moment(value));
-      let diff = UTC.getTimezoneOffset();
-   
-      var local=new Date(UTC.setMinutes(UTC.getMinutes() + diff));
 
-      return  local.toLocaleDateString() +' '+local.toLocaleTimeString()
+      return  UTC.toLocaleDateString() +' '+UTC.toLocaleTimeString()
     },
 
   },
